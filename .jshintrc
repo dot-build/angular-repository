@@ -1,0 +1,18 @@
+{
+	"globals": {
+		"angular": true,
+		"console": true,
+		"module": true,
+		"inject": true,
+		"getJSONFixture": true,
+		"loadJSONFixture": true,
+		"xdescribe": true,
+		"xit": true
+	},
+	"strict": false,
+	"validthis": false,
+	"quotmark": false,
+	"undef": true,
+	"esnext": true,
+	"jasmine": true
+}
