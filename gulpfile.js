@@ -15,75 +15,32 @@ var gulp = require('gulp'),
 	livereload = require('gulp-livereload'),
 	karma = require('karma').server,
 
-	// NOTE: don't join the template strings, it will break Slush!
-	wrapper = '(function(undefined){\n\n<' + '%= contents %>\n}());';
+	wrapper = '(function(undefined){\n\n<%= contents %>\n}());';
 
 diAnnotations.logger.enabled = false;
 diAnnotations.constants.MODULE = 'angular.module(\'repository\')';
 
-gulp.task('min', function() {
-	var pipe = pipeline(
-		gulp.src(['src/module.js', 'src/**/!(*spec).js']),
+var PATH = {
+	sourceFiles: ['src/module.js', 'src/**/*.js'],
+	dist: 'dist',
+	distFile: 'repository.js',
+	karmaUnit: __dirname + '/karma.conf.js'
+};
+
+gulp.task('min', ['test'], function() {
+	return pipeline(
+		gulp.src(PATH.sourceFiles),
 		annotations(),
-		concat('app.js'),
+		concat(PATH.distFile),
 		wrap(wrapper),
-		gulp.dest('public'),
+		gulp.dest(PATH.dist),
 		uglify(),
 		rename({
 			suffix: '.min'
 		}),
-		gulp.dest('public')
+		gulp.dest(PATH.dist),
+		createLogger('min')
 	);
-
-	pipe.on('error', createLogger('min'));
-	return pipe;
-});
-
-gulp.task('sass', function() {
-	var pipe = pipeline(
-		gulp.src('scss/**/*.scss'),
-		sass({
-			outputStyle: 'nested',
-			errLogToConsole: true
-		}),
-		concat('app.css'),
-		gulp.dest('public')
-	);
-
-	pipe.on('error', createLogger('sass'));
-	return pipe;
-});
-
-gulp.task('mocks', function() {
-	var pipe = pipeline(
-		gulp.src(['mocks/module.js', 'mocks/**/*.js']),
-		concat('mocks.js'),
-		wrap(wrapper),
-		gulp.dest('public')
-	);
-
-	pipe.on('error', createLogger('mocks'));
-	return pipe;
-})
-
-
-gulp.task('views', function() {
-	var pipe = pipeline(
-		gulp.src('views/**/*.html'),
-		templateCache({
-			output: 'views.js',
-			strip: 'views',
-			moduleName: 'app',
-			minify: {
-				collapseBooleanAttributes: true,
-				collapseWhitespace: true
-			}
-		}),
-		gulp.dest('public')
-	);
-
-	pipe.on('error', createLogger('views'));
-	return pipe;
 });
 
 gulp.task('serve', function() {
@@ -93,15 +50,16 @@ gulp.task('serve', function() {
 // @see https://github.com/karma-runner/gulp-karma#do-we-need-a-plugin
 gulp.task('test', function(done) {
 	karma.start({
-		configFile: __dirname + '/karma.conf.js',
+		configFile: PATH.karmaUnit,
 		singleRun: true
 	}, done);
 });
 
 gulp.task('tdd', function(done) {
 	karma.start({
-		configFile: __dirname + '/karma.conf.js',
-		singleRun: false
+		configFile: PATH.karmaUnit,
+		singleRun: false,
+		autoWatch: true
 	}, done);
 });
 
@@ -113,14 +71,10 @@ gulp.task('watch', function() {
 	}
 
 	handleChanges(gulp.watch('src/**/*.js', ['min']));
-	handleChanges(gulp.watch('scss/**/*.scss', ['sass']));
-	handleChanges(gulp.watch('views/**/*.html', ['views']));
-	handleChanges(gulp.watch('mocks/**/*.js', ['mocks']));
 });
 
-gulp.task('build', ['min', 'sass', 'mocks', 'views']);
-
-gulp.task('default', ['min', 'sass', 'mocks', 'views', 'watch']);
+gulp.task('build', ['min']);
+gulp.task('default', ['test', 'min', 'watch']);
 
 function createLogger(name) {
 	return function() {

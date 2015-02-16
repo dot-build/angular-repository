@@ -28,7 +28,6 @@ module.exports = function(config) {
 		files: [
 			'vendor/angular.js',
 			'vendor/angular-mocks.js',
-			'vendor/angular-ui-router.js',
 			'vendor/es5-shim.min.js',
 			'vendor/EventEmitter.js',
 			'vendor/JSONHttpRequest.js',

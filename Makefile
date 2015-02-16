@@ -1,13 +1,13 @@
 all:
-	./node_modules/gulp/bin/gulp build
+	./node_modules/gulp/bin/gulp.js build
 
 tdd:
-	./node_modules/gulp/bin/gulp tdd
+	./node_modules/gulp/bin/gulp.js tdd
 
 test:
-	./node_modules/gulp/bin/gulp test
+	./node_modules/gulp/bin/gulp.js test
 
 watch:
-	./node_modules/gulp/bin/gulp default
+	./node_modules/gulp/bin/gulp.js default
 
 .PHONY: all tdd test watch

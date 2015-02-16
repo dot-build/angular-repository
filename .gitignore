@@ -1,2 +1,4 @@
 node_modules
 test/coverage
+dist/*.min.js
+*.sublime*
