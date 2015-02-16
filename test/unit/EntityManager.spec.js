@@ -1,4 +1,4 @@
-describe('EntityManager', function() {
+ddescribe('EntityManager', function() {
 	function Repository() {}
 
 	beforeEach(module('repository'));

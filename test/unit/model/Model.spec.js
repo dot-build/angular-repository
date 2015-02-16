@@ -1,4 +1,4 @@
-describe('Model', function() {
+xdescribe('Model', function() {
 	beforeEach(module('repository'));
 
 	describe('#constructor(Object data)', function() {

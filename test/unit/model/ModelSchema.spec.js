@@ -1,4 +1,4 @@
-describe('ModelSchema', function() {
+xdescribe('ModelSchema', function() {
 	beforeEach(module('repository'));
 
 	describe('#constructor(Object schema)', function() {
