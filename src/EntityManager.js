@@ -33,20 +33,10 @@ function EntityManagerFactory(Repository) {
 		delete repositoryMap[name];
 	}
 
-	function setUrlPrefix(prefix) {
-		urlPrefix = prefix;
-	}
-
-	function getUrlPrefix() {
-		return urlPrefix;
-	}
-
 	return {
 		addRepository: addRepository,
 		hasRepository: hasRepository,
 		getRepository: getRepository,
-		removeRepository: removeRepository,
-		setUrlPrefix: setUrlPrefix,
-		getUrlPrefix: getUrlPrefix
+		removeRepository: removeRepository
 	};
 }

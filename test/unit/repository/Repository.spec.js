@@ -68,12 +68,20 @@ ddescribe('Repository', function() {
 		}));
 	});
 
-	describe('#updateContext(RepositoryContext context)', function() {
-		it('should detect context changes, fetch a new set of items from a DataProvider and keep the context updated', inject(function(RepositoryContext) {
+	describe('private updateContext(RepositoryContext context)', function() {
+		it('should respond to context changes fetching a new set of items from a DataProvider and keeping the context updated', function() {
 			var context = instance.createContext('context');
+			var updateSpy = jasmine.createSpy('ctx-update');
+
 			context.initialize();
+			context.on('update', updateSpy);
+
+			expect(context.list.length).toBe(0);
 			context.filters().where('name', 'John');
-			// repository.
-		}));
+
+			expect(updateSpy).toHaveBeenCalled();
+
+
+		});
 	});
 });

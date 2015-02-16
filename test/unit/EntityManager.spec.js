@@ -6,17 +6,6 @@ ddescribe('EntityManager', function() {
 		Repository: Repository
 	}));
 
-	describe('#[sg]etUrlPrefix', function() {
-		it('should set a URL prefix to add on every request made to server', inject(function(EntityManager) {
-			var prefix = '/api/v1';
-
-			EntityManager.setUrlPrefix(prefix);
-			var savedPrefix = EntityManager.getUrlPrefix();
-
-			expect(savedPrefix).toBe(prefix);
-		}));
-	});
-
 	describe('#hasRepository', function() {
 		it('should return true/false if a repository exists in the manager or not', inject(function(EntityManager) {
 			EntityManager.addRepository('name', '/name');

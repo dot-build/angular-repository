@@ -5,6 +5,7 @@ function utilsFactory() {
 	var utils = {};
 
 	utils.inherits = inherits;
+	utils.extend = extend;
 	utils.merge = merge;
 
 	return utils;
@@ -43,5 +44,19 @@ function utilsFactory() {
 
 		NewClass.prototype = childPrototype;
 		NewClass.prototype.constructor = NewClass;
+	}
+
+	/**
+	 * @param {Function} SuperClass 	The class to extend
+	 * @param {Object} prototype 		New properties for SubClass
+	 */
+	function extend(SuperClass, prototype) {
+		function SubClass() {
+			SuperClass.call(this);
+		}
+
+		inherits(SubClass, SuperClass, prototype);
+
+		return SubClass;
 	}
 }
