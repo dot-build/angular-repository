@@ -7,7 +7,6 @@ var gulp = require('gulp'),
 	annotations = diAnnotations.Stream,
 	wrap = require('gulp-wrap'),
 	pipeline = require('multipipe'),
-	livereload = require('gulp-livereload'),
 	karma = require('karma').server,
 
 	wrapper = '(function(undefined){\n\n<%= contents %>\n}());';
@@ -41,10 +40,6 @@ gulp.task('min', function() {
 	});
 
 	return pipe;
-});
-
-gulp.task('serve', function() {
-	require('./server');
 });
 
 var vendorFiles = [
@@ -117,16 +112,5 @@ gulp.task('integration-tdd', ['unit'], function(done) {
 });
 
 gulp.task('test', ['integration']);
-
-gulp.task('watch', function() {
-	livereload.listen();
-
-	function handleChanges(stream) {
-		stream.on('change', livereload.changed);
-	}
-
-	handleChanges(gulp.watch('src/**/*.js', ['min']));
-});
-
 gulp.task('build', ['test', 'min']);
-gulp.task('default', ['test', 'min', 'watch']);
+gulp.task('default', ['tdd']);

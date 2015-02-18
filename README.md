@@ -38,8 +38,10 @@ The repositories are also registered in the `$injector`, and can later be inject
 controllers, services or other components.
 
 ```javascript
+// the name 'Product' is used to create the injectable name 'ProductRepository'
+// the repository can also be found with RepositoryManager.getRepository('Product');
 var repositoryConfig = new RepositoryConfig({
-	name: 'product',
+	name: 'Product',
 	endpoint: '/products',
 	dataProvider: MyDataProvider
 });

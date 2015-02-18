@@ -144,6 +144,9 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
     }
     var prototype = {
         INVALID_RESPONSE: 'INVALID_RESPONSE',
+        $$filters: null,
+        $$pagination: null,
+        $$sorting: null,
         initialize: initialize,
         filters: filters,
         sorting: sorting,
