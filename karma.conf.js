@@ -25,20 +25,6 @@ module.exports = function(config) {
 			'/': 'http://localhost:8000/'
 		},
 
-		files: [
-			'vendor/angular.js',
-			'vendor/angular-mocks.js',
-			'vendor/es5-shim.min.js',
-			'vendor/EventEmitter.js',
-			'vendor/JSONHttpRequest.js',
-			'vendor/jasmine-fixtures.js',
-			'src/module.js',
-			'src/**/*.js',
-			// 'integration/**/*.js',
-			'test/unit/**/*.spec.js',
-			// 'test/integration/**/*.spec.js'
-		],
-
 		exclude: [],
 
 		urlRoot: '/__karma__/',

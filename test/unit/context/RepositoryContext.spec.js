@@ -1,16 +1,22 @@
+/**
+ * The context is a set of objects that store state and represent a viewpoint of a given resource
+ * Each context holds pagination, sorting and filtering state that correspond to a way to see a list
+ * of any resource type.
+ */
 describe('RepositoryContext', function() {
-	var context;
+	var context, CONTEXT_NAME = 'test-context';
 
 	beforeEach(module('repository'));
 
 	beforeEach(inject(function(RepositoryContext) {
-		context = new RepositoryContext();
+		context = new RepositoryContext(CONTEXT_NAME);
 		context.initialize();
 	}));
 
-	describe('#constructor', function() {
-		it('should be a subclass of EventEmitter', inject(function(EventEmitter) {
+	describe('#constructor(String name)', function() {
+		it('should be a subclass of EventEmitter and store the state name', inject(function(EventEmitter) {
 			expect(context instanceof EventEmitter).toBe(true);
+			expect(context.name).toBe(CONTEXT_NAME);
 		}));
 	});
 
@@ -19,6 +25,8 @@ describe('RepositoryContext', function() {
 			expect(context.$$filters).not.toBe(undefined);
 			expect(context.$$sorting).not.toBe(undefined);
 			expect(context.$$pagination).not.toBe(undefined);
+			expect(context.data).toBe(null);
+			expect(context.error).toBe(null);
 		});
 
 		it('should accept default values for filtering, sorting and pagination',
@@ -159,5 +167,66 @@ describe('RepositoryContext', function() {
 			expect(statePagination.itemsPerPage).toBe(pagination.itemsPerPage);
 			expect(statePagination.currentPage).toBe(pagination.currentPage);
 		}));
+	});
+
+	describe('#setData(Object dto)', function() {
+		it('should update the context data/state and return true', function() {
+			expect(context.data).toBe(null);
+			expect(context.error).toBe(null);
+
+			// a valid DTO must have a "meta" property with at least the count value
+			var dto = {
+				meta: {
+					count: 30,
+					currentPage: 1,
+					itemsPerPage: 20
+				},
+				data: [{
+					name: 'John'
+				}, {
+					name: 'Bob'
+				}]
+			};
+
+			context.error = {};
+			var response = context.setData(dto);
+
+			expect(context.data).not.toBe(null);
+			expect(Array.isArray(context.data)).toBe(true);
+			expect(context.data.length).toBe(2);
+			expect(context.data[0].name).toBe('John');
+			expect(context.data[1].name).toBe('Bob');
+			expect(context.error).toBe(null);
+			expect(response).toBe(true);
+		});
+
+		it('should NOT change the context data and change the context error if the DTO format is invalid, returning false', function() {
+			expect(context.data).toBe(null);
+			expect(context.error).toBe(null);
+
+			var dto = {
+				data: []
+			};
+
+			var response = context.setData(dto);
+			expect(response).toBe(false);
+
+			expect(context.data).toBe(null);
+			expect(context.error).toBe(context.INVALID_RESPONSE);
+		});
+	});
+
+	describe('#setError(Mixed error)', function() {
+		it('should set the error property with the errors of last call', function() {
+			expect(context.error).toBe(null);
+			expect(context.data).toBe(null);
+
+			var errors = ['An error happened'];
+
+			context.setError(errors);
+
+			expect(context.error).toBe(errors);
+			expect(context.data).toBe(null);
+		});
 	});
 });

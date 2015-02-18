@@ -17,10 +17,13 @@ function RepositoryContextPaginationFactory(utils, EventEmitter) {
 
 	RepositoryContextPagination.create = function(state) {
 		var instance = new RepositoryContextPagination();
-		instance.setState(state);
+
+		if (state) {
+			instance.setState(state);
+		}
 
 		return instance;
-	}
+	};
 
 	var prototype = {
 		reset: function() {
@@ -69,7 +72,7 @@ function RepositoryContextPaginationFactory(utils, EventEmitter) {
 
 		setCount: function(count) {
 			this.count = count;
-			this.pageCount = Math.ceil(this.count / this.itemsPerPage);
+			this.pageCount = this.itemsPerPage > 0 ? Math.ceil(this.count / this.itemsPerPage) : 0;
 			return this;
 		},
 
@@ -84,16 +87,21 @@ function RepositoryContextPaginationFactory(utils, EventEmitter) {
 		setState: function(state) {
 			if (!state || typeof state !== 'object') return;
 
+			var page, limit, count;
+
 			if ('itemsPerPage' in state) {
-				this.itemsPerPage = Number(state.itemsPerPage);
+				limit = Number(state.itemsPerPage) | 0;
+				this.itemsPerPage = limit > 0 ? limit : 0;
 			}
 
 			if ('count' in state) {
-				this.setCount(Number(state.count));
+				count = Number(state.count) | 0;
+				this.setCount(count > 0 ? count : 0);
 			}
 
 			if ('currentPage' in state) {
-				this.currentPage = Number(state.currentPage);
+				page = Number(state.currentPage) | 0;
+				this.currentPage = page > 0 ? page : 1;
 			}
 		}
 	};

@@ -24,6 +24,10 @@ function RepositoryContextFilterFactory(EventEmitter, utils) {
 		IN: 'in'
 	};
 
+	var operatorsArray = Object.keys(operators).map(function(key) {
+		return operators[key]
+	});
+
 	var prototype = {
 		import: addFilterList,
 		toJSON: toJSON,
@@ -74,6 +78,8 @@ function RepositoryContextFilterFactory(EventEmitter, utils) {
 			value = operator;
 			operator = operators.EQ;
 		}
+
+		if (operatorsArray.indexOf(operator) === -1) return;
 
 		addFilter.call(this, [name, operator, value]);
 		this.emit('update', this);

@@ -18,9 +18,19 @@ describe('RepositoryContextPagination', function() {
 			var instance = RepositoryContextPagination.create(paginationState);
 
 			expect(instance instanceof RepositoryContextPagination).toBe(true);
-			expect(instance.count).toBe(100);
-			expect(instance.currentPage).toBe(1);
-			expect(instance.itemsPerPage).toBe(10);
+			expect(instance.count).toBe(paginationState.count);
+			expect(instance.currentPage).toBe(paginationState.currentPage);
+			expect(instance.itemsPerPage).toBe(paginationState.itemsPerPage);
+		}));
+
+		it('should create a RepositoryContextPagination instance and set the DEFAULT state', inject(function(RepositoryContextPagination) {
+			var instance = RepositoryContextPagination.create();
+			var defaults = RepositoryContextPagination.defaults;
+
+			expect(instance instanceof RepositoryContextPagination).toBe(true);
+			expect(instance.count).toBe(0);
+			expect(instance.currentPage).toBe(defaults.currentPage);
+			expect(instance.itemsPerPage).toBe(defaults.itemsPerPage);
 		}));
 	});
 
@@ -83,10 +93,24 @@ describe('RepositoryContextPagination', function() {
 			expect(instance.count).toBe(100);
 			expect(instance.pageCount).toBe(20);
 		});
+
+		it('should handle zeros or invalid values', function() {
+			var state = {
+				count: -1,
+				itemsPerPage: 0,
+				currentPage: 'hu3'
+			};
+
+			instance.setState(state);
+			expect(instance.itemsPerPage).toBe(0);
+			expect(instance.pageCount).toBe(0);
+			expect(instance.count).toBe(0);
+			expect(instance.currentPage).toBe(1);
+		});
 	});
 
 	describe('.pageCount', function() {
-		it('should hold the page count', function() {
+		it('should have the current page count', function() {
 			instance.setState({
 				count: 20,
 				currentPage: 1,

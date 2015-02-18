@@ -121,8 +121,9 @@ describe('RepositoryContextFilter', function() {
 			expect(firstFilter.value).toBe('John');
 		});
 
-		xit('should NOT accept invalid operators', function() {
-			// TODO
+		it('should NOT accept invalid operators', function() {
+			instance.where('name', 'ZZ', 'John');
+			expect(instance.$$filters.length).toBe(0);
 		});
 	});
 

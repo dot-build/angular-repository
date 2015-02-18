@@ -47,11 +47,34 @@ gulp.task('serve', function() {
 	require('./server');
 });
 
+var vendorFiles = [
+	'vendor/angular.js',
+	'vendor/angular-mocks.js',
+	'vendor/es5-shim.min.js',
+	'vendor/EventEmitter.js',
+	'vendor/JSONHttpRequest.js',
+	'vendor/jasmine-fixtures.js'
+];
+
+var unitFiles = vendorFiles.concat([
+	'src/module.js',
+	'src/**/*.js',
+	'test/unit/**/*.spec.js',
+]);
+
+var integrationFiles = vendorFiles.concat([
+	'src/module.js',
+	'src/**/*.js',
+	'integration/**/*.js',
+	'test/integration/**/*.spec.js'
+]);
+
 // @see https://github.com/karma-runner/gulp-karma#do-we-need-a-plugin
-gulp.task('test', function(done) {
+gulp.task('unit', function(done) {
 	karma.start({
 		configFile: PATH.karmaUnit,
-		singleRun: true
+		singleRun: true,
+		files: unitFiles
 	}, done);
 });
 
@@ -59,9 +82,20 @@ gulp.task('tdd', function(done) {
 	karma.start({
 		configFile: PATH.karmaUnit,
 		singleRun: false,
-		autoWatch: true
+		autoWatch: true,
+		files: unitFiles
 	}, done);
 });
+
+gulp.task('integration', function(done) {
+	karma.start({
+		configFile: PATH.karmaUnit,
+		singleRun: true,
+		files: integrationFiles
+	}, done);
+});
+
+gulp.task('test', ['unit', 'integration']);
 
 gulp.task('watch', function() {
 	livereload.listen();
@@ -73,7 +107,7 @@ gulp.task('watch', function() {
 	handleChanges(gulp.watch('src/**/*.js', ['min']));
 });
 
-gulp.task('build', ['min']);
+gulp.task('build', ['test', 'min']);
 gulp.task('default', ['test', 'min', 'watch']);
 
 function createLogger(name) {

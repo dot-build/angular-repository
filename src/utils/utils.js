@@ -38,10 +38,13 @@ function utilsFactory() {
 		var prototype = SuperClass.prototype,
 			childPrototype = Object.create(prototype);
 
-		Object.keys(attributes).forEach(function(key) {
-			childPrototype[key] = attributes[key];
-		});
+		if (attributes) {
+			Object.keys(attributes).forEach(function(key) {
+				childPrototype[key] = attributes[key];
+			});
+		}
 
+		childPrototype.__super__ = SuperClass.prototype;
 		NewClass.prototype = childPrototype;
 		NewClass.prototype.constructor = NewClass;
 	}
@@ -52,7 +55,7 @@ function utilsFactory() {
 	 */
 	function extend(SuperClass, prototype) {
 		function SubClass() {
-			SuperClass.call(this);
+			SuperClass.apply(this, arguments);
 		}
 
 		inherits(SubClass, SuperClass, prototype);

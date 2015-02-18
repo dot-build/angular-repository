@@ -3,13 +3,10 @@
  */
 function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination) {
 	function RepositoryContext(name) {
-		EventEmitter.call(this);
-
 		this.name = name;
-		this.list = [];
+		EventEmitter.call(this);
 	}
 
-	// TODO add a method to import state values from a state object, e.g. $stateParams
 	function initialize(filters, sorting, pagination) {
 		var boundUpdateFn = update.bind(this);
 
@@ -20,6 +17,9 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
 		this.$$filters.on('update', boundUpdateFn);
 		this.$$sorting.on('update', boundUpdateFn);
 		this.$$pagination.on('update', boundUpdateFn);
+
+		this.data = null;
+		this.error = null;
 	}
 
 	function filters() {
@@ -35,16 +35,31 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
 	}
 
 	function update() {
-		// a second update is called with one already in progress
-		/*if (this.updateInProgress) {
-			this.needsUpdate = true;
-			return;
+		this.emit('update', this);
+	}
+
+	function setData(dataTransferObject) {
+		if (!dataTransferObject || typeof dataTransferObject !== 'object' || 'meta' in dataTransferObject === false) {
+			this.error = this.INVALID_RESPONSE;
+			return false;
 		}
 
-		this.updateInProgress = true;
-		*/
+		var page = dataTransferObject.meta;
 
-		this.emit('update', this);
+		this.$$pagination.setState({
+			count: page.count || null,
+			currentPage: page.currentPage || null,
+			itemsPerPage: page.itemsPerPage || null
+		});
+
+		this.data = dataTransferObject.data || null;
+		this.error = null;
+
+		return true;
+	}
+
+	function setError(error) {
+		this.error = error;
 	}
 
 	function reset() {
@@ -61,35 +76,18 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
 		};
 	}
 
-	/*var contextProto = {
-		this.emit('filter', this);
-		this.emit('sort', this);
-
-		setItems: function(list) {
-			if (this.needsUpdate) {
-				this.updateInProgress = false;
-				this.needsUpdate = false;
-				this.update();
-				return;
-			}
-
-			this.list = list;
-			this.emit('change', this.list);
-
-			this.updateInProgress = false;
-			this.needsUpdate = false;
-			return this;
-		}
-	};*/
-
 	var prototype = {
+		INVALID_RESPONSE: 'INVALID_RESPONSE',
+
 		initialize: initialize,
 		filters: filters,
 		sorting: sorting,
 		pagination: pagination,
 		update: update,
 		reset: reset,
-		toJSON: toJSON
+		toJSON: toJSON,
+		setData: setData,
+		setError: setError
 	};
 
 	utils.inherits(RepositoryContext, EventEmitter, prototype);
