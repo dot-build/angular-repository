@@ -14,7 +14,7 @@ describe('RepositoryConfig', function() {
 		}));
 
 		it('should NOT continue without an endpoint', inject(function(RepositoryConfig, DataProviderInterface) {
-			var DummyProvider = DataProviderInterface.implement();
+			var DummyProvider = DataProviderInterface.extend();
 
 			function invalidEndpoint() {
 				return new RepositoryConfig({
@@ -26,7 +26,7 @@ describe('RepositoryConfig', function() {
 		}));
 
 		it('should copy the config values to instance', inject(function(DataProviderInterface, RepositoryConfig) {
-			var DummyProvider = DataProviderInterface.implement();
+			var DummyProvider = DataProviderInterface.extend();
 
 			var instance = new RepositoryConfig({
 				endpoint: '/endpoint',

@@ -201,11 +201,13 @@ describe('RepositoryContext', function() {
 		});
 
 		it('should NOT change the context data and change the context error if the DTO format is invalid, returning false', function() {
+			// a valid DTO must have a "data" property that is applied to context
+
 			expect(context.data).toBe(null);
 			expect(context.error).toBe(null);
 
 			var dto = {
-				data: []
+				meta: {}
 			};
 
 			var response = context.setData(dto);
@@ -213,6 +215,14 @@ describe('RepositoryContext', function() {
 
 			expect(context.data).toBe(null);
 			expect(context.error).toBe(context.INVALID_RESPONSE);
+
+			dto.data = [];
+
+			var response = context.setData(dto);
+			expect(response).toBe(true);
+
+			expect(context.data).toBe(dto.data);
+			expect(context.error).toBe(null);
 		});
 	});
 

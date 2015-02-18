@@ -2,10 +2,10 @@ describe('DataProviderInterface', function() {
 
 	beforeEach(module('repository'));
 
-	describe('::implement', function() {
-		it('should have a static method to extend the provider class', inject(function(DataProviderInterface) {
-			expect(typeof DataProviderInterface.implement).toBe('function');
-			var SubClass = DataProviderInterface.implement({});
+	describe('::extend', function() {
+		it('should have a static method to extend the provider interface', inject(function(DataProviderInterface) {
+			expect(typeof DataProviderInterface.extend).toBe('function');
+			var SubClass = DataProviderInterface.extend({});
 			var instance = new SubClass();
 
 			expect(instance instanceof DataProviderInterface).toBe(true);
@@ -14,7 +14,7 @@ describe('DataProviderInterface', function() {
 
 	describe('abstract methods', function() {
 		it('should throw exceptions if a method not implemented is called', inject(function(DataProviderInterface, $rootScope) {
-			var Implementation = DataProviderInterface.implement();
+			var Implementation = DataProviderInterface.extend();
 			var instance = new Implementation();
 
 			checkPromise(instance.findOne);
@@ -40,7 +40,7 @@ describe('DataProviderInterface', function() {
 
 	describe('can* methods', function() {
 		it('should return true as the default response', inject(function(DataProviderInterface, $rootScope) {
-			var Implementation = DataProviderInterface.implement();
+			var Implementation = DataProviderInterface.extend();
 			var instance = new Implementation();
 
 			expect(instance.canGet()).toBe(true);

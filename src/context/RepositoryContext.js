@@ -39,18 +39,20 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
 	}
 
 	function setData(dataTransferObject) {
-		if (!dataTransferObject || typeof dataTransferObject !== 'object' || 'meta' in dataTransferObject === false) {
+		if (!dataTransferObject || typeof dataTransferObject !== 'object' || 'data' in dataTransferObject === false) {
 			this.error = this.INVALID_RESPONSE;
 			return false;
 		}
 
 		var page = dataTransferObject.meta;
 
-		this.$$pagination.setState({
-			count: page.count || null,
-			currentPage: page.currentPage || null,
-			itemsPerPage: page.itemsPerPage || null
-		});
+		if (page) {
+			this.$$pagination.setState({
+				count: page.count || null,
+				currentPage: page.currentPage || null,
+				itemsPerPage: page.itemsPerPage || null
+			});
+		}
 
 		this.data = dataTransferObject.data || null;
 		this.error = null;

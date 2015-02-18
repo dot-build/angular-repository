@@ -1,241 +1,179 @@
 (function(undefined){
 
 angular.module('repository', ['EventEmitter']);
-function EntityManagerFactory(Repository) {
-    var repositoryMap = {}, urlPrefix = '';
-    function addRepository(name, config) {
-        if (!name || name in repositoryMap || !config || typeof config === 'object' && !config.endpoint) {
-            throw new Error('Invalid repository definition');
-        }
-        if (typeof config === 'string') {
-            config = { endpoint: config };
-        }
-        if (!config.model) {
-            config.model = name;
-        }
-        repositoryMap[name] = new Repository(name, config);
+function DataProviderInterfaceFactory(utils, $q) {
+    function DataProviderInterface() {
     }
-    function getRepository(name) {
-        if (name in repositoryMap === false)
-            return null;
-        return repositoryMap[name];
+    function extend(prototype) {
+        return utils.extend(DataProviderInterface, prototype);
     }
-    function hasRepository(name) {
-        return name in repositoryMap;
+    function notImplemented(method) {
+        return function () {
+            return $q.reject(new Error(method + '() is not implemented'));
+        };
     }
-    function removeRepository(name) {
-        delete repositoryMap[name];
-    }
-    function setUrlPrefix(prefix) {
-        urlPrefix = prefix;
-    }
-    function getUrlPrefix() {
-        return urlPrefix;
-    }
-    return {
-        addRepository: addRepository,
-        hasRepository: hasRepository,
-        getRepository: getRepository,
-        removeRepository: removeRepository,
-        setUrlPrefix: setUrlPrefix,
-        getUrlPrefix: getUrlPrefix
+    DataProviderInterface.extend = extend;
+    DataProviderInterface.prototype = {
+        findOne: notImplemented('findOne'),
+        findAll: notImplemented('findAll'),
+        remove: notImplemented('remove'),
+        save: notImplemented('save'),
+        canGet: canDoMethod,
+        canSave: canDoMethod,
+        canRemove: canDoMethod,
+        canList: canDoMethod
     };
+    function canDoMethod() {
+        return true;
+    }
+    return DataProviderInterface;
 }
-angular.module('repository').factory('EntityManager', EntityManagerFactory);
-EntityManagerFactory.$inject = ['Repository'];
-function PaginationFactory(utils, EventEmitter) {
-    var paginationDefaults = {
-        count: 0,
-        currentPage: 1,
-        itemsPerPage: 10
-    };
-    function Pagination() {
-        EventEmitter.call(this);
-        this.reset();
-    }
-    var paginationProto = {
-        reset: function () {
-            angular.extend(this, paginationDefaults);
-            this.pageCount = 0;
-        },
-        next: function () {
-            if (!this.hasNext())
-                return false;
-            return this.goTo(this.currentPage + 1);
-        },
-        previous: function () {
-            if (!this.hasPrevious())
-                return false;
-            return this.goTo(this.currentPage - 1);
-        },
-        first: function () {
-            if (!this.hasPrevious())
-                return false;
-            return this.goTo(1);
-        },
-        last: function () {
-            if (!this.hasNext())
-                return false;
-            return this.goTo(this.pageCount);
-        },
-        page: function (page, limit) {
-            if (limit) {
-                this.itemsPerPage = Number(limit);
-            }
-            return this.goTo(page);
-        },
-        hasNext: function () {
-            return this.currentPage < this.pageCount;
-        },
-        hasPrevious: function () {
-            return this.currentPage > 1;
-        },
-        setCount: function (count) {
-            this.count = count;
-            this.pageCount = Math.ceil(this.count / this.itemsPerPage);
-            return this;
-        },
-        toJSON: function () {
-            return {
-                page: this.currentPage,
-                max: this.itemsPerPage
-            };
-        },
-        goTo: function (page) {
-            if (!page)
-                return;
-            this.currentPage = page;
-            this.emit('change', this);
-        }
-    };
-    utils.inherits(Pagination, EventEmitter, paginationProto);
-    return Pagination;
-}
-angular.module('repository').factory('Pagination', PaginationFactory);
-PaginationFactory.$inject = [
+angular.module('repository').factory('DataProviderInterface', DataProviderInterfaceFactory);
+DataProviderInterfaceFactory.$inject = [
     'utils',
-    'EventEmitter'
+    '$q'
 ];
-function RepositoryContextFactory(EventEmitter, Pagination, utils) {
-    function RepositoryContext(name) {
-        EventEmitter.call(this);
-        this.name = name;
-        this.list = [];
-    }
-    var contextProto = {
-        ASC: 'asc',
-        DESC: 'desc',
-        initialize: function () {
-            this.filters = {};
-            this.sorting = {};
-            this.customValues = {};
-            this.pagination = new Pagination();
-            this.pagination.on('change', this.update.bind(this));
-            this.defaults = {
-                filters: {},
-                sorting: {}
-            };
-        },
-        filter: function (name, value) {
-            if (angular.isObject(name)) {
-                angular.extend(this.filters, name);
+function RepositoryManagerProvider($provide) {
+    function RepositoryManagerFactory(Repository, RepositoryConfig) {
+        var repositoryMap = {};
+        var repositoryManager = {
+            addRepository: addRepository,
+            hasRepository: hasRepository,
+            getRepository: getRepository,
+            suffix: 'Repository'
+        };
+        function addRepository(config, properties) {
+            if (!config || config instanceof RepositoryConfig === false) {
+                throw new Error('Invalid repository definition');
+            }
+            var name = config.name;
+            if (!name) {
+                throw new Error('Invalid repository name');
+            }
+            if (repositoryMap.hasOwnProperty(name)) {
+                throw new Error('Repository ' + name + ' already registed');
+            }
+            var ctor, instance;
+            if (properties) {
+                ctor = Repository.extend(properties);
+                instance = new ctor(config);
             } else {
-                this.filters[name] = value || null;
+                instance = new Repository(config);
             }
-            this.emit('filter', this);
-            this.update();
-            return this;
-        },
-        sort: function (property, direction) {
-            this.sorting[property] = direction;
-            this.emit('sort', this);
-            this.update();
-            return this;
-        },
-        paginate: function (page, limit) {
-            page = Number(page) || 1;
-            limit = Number(limit) || null;
-            var pagination = this.pagination;
-            pagination.page(page, limit);
-            this.emit('paginate', this);
-            this.update();
-            return this;
-        },
-        update: function () {
-            if (this.updateInProgress) {
-                this.needsUpdate = true;
-                return;
-            }
-            this.updateInProgress = true;
-            this.emit('update', this);
-        },
-        setItems: function (list) {
-            if (this.needsUpdate) {
-                this.updateInProgress = false;
-                this.needsUpdate = false;
-                this.update();
-                return;
-            }
-            this.list = list;
-            this.emit('change', this.list);
-            this.updateInProgress = false;
-            this.needsUpdate = false;
-            return this;
-        },
-        reset: function () {
-            this.list.length = 0;
-            this.resetFilters();
-            this.resetSorting();
-            this.customValues = {};
-        },
-        resetFilters: function () {
-            this.filters = angular.copy(this.defaults.filters, {});
-        },
-        resetSorting: function () {
-            this.sorting = angular.copy(this.defaults.sorting, {});
-        },
-        set: function (name, value) {
-            this.customValues[name] = value;
-        },
-        get: function (name) {
-            return this.customValues[name] || null;
-        },
-        setDefaultFilters: function (filters) {
-            this.defaults.filters = filters;
-            return this;
-        },
-        setDefaultSorting: function (sorting) {
-            this.defaults.sorting = sorting;
-            return this;
-        },
-        toJSON: function () {
-            return {
-                filter: Model.toJSON(this.filters),
-                sort: Model.toJSON(this.sorting),
-                page: this.pagination.toJSON()
-            };
+            repositoryMap[name] = instance;
+            $provide.value(name + repositoryManager.suffix, instance);
+            return instance;
         }
+        function getRepository(name) {
+            if (name in repositoryMap === false)
+                return null;
+            return repositoryMap[name];
+        }
+        function hasRepository(name) {
+            return name in repositoryMap;
+        }
+        return repositoryManager;
+    }
+    this.$get = [
+        'Repository',
+        'RepositoryConfig',
+        RepositoryManagerFactory
+    ];
+}
+angular.module('repository').provider('RepositoryManager', RepositoryManagerProvider);
+RepositoryManagerProvider.$inject = ['$provide'];
+function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination) {
+    function RepositoryContext(name) {
+        this.name = name;
+        EventEmitter.call(this);
+    }
+    function initialize(filters, sorting, pagination) {
+        var boundUpdateFn = update.bind(this);
+        this.$$filters = RepositoryContextFilter.create(filters);
+        this.$$sorting = RepositoryContextSorting.create(sorting);
+        this.$$pagination = RepositoryContextPagination.create(pagination);
+        this.$$filters.on('update', boundUpdateFn);
+        this.$$sorting.on('update', boundUpdateFn);
+        this.$$pagination.on('update', boundUpdateFn);
+        this.data = null;
+        this.error = null;
+    }
+    function filters() {
+        return this.$$filters;
+    }
+    function sorting() {
+        return this.$$sorting;
+    }
+    function pagination() {
+        return this.$$pagination;
+    }
+    function update() {
+        this.emit('update', this);
+    }
+    function setData(dataTransferObject) {
+        if (!dataTransferObject || typeof dataTransferObject !== 'object' || 'data' in dataTransferObject === false) {
+            this.error = this.INVALID_RESPONSE;
+            return false;
+        }
+        var page = dataTransferObject.meta;
+        if (page) {
+            this.$$pagination.setState({
+                count: page.count || null,
+                currentPage: page.currentPage || null,
+                itemsPerPage: page.itemsPerPage || null
+            });
+        }
+        this.data = dataTransferObject.data || null;
+        this.error = null;
+        return true;
+    }
+    function setError(error) {
+        this.error = error;
+    }
+    function reset() {
+        this.$$filters.reset();
+        this.$$sorting.reset();
+        this.$$pagination.reset();
+    }
+    function toJSON() {
+        return {
+            filters: this.$$filters.toJSON(),
+            pagination: this.$$pagination.toJSON(),
+            sorting: this.$$sorting.toJSON()
+        };
+    }
+    var prototype = {
+        INVALID_RESPONSE: 'INVALID_RESPONSE',
+        initialize: initialize,
+        filters: filters,
+        sorting: sorting,
+        pagination: pagination,
+        update: update,
+        reset: reset,
+        toJSON: toJSON,
+        setData: setData,
+        setError: setError
     };
-    utils.inherits(RepositoryContext, EventEmitter, contextProto);
+    utils.inherits(RepositoryContext, EventEmitter, prototype);
     return RepositoryContext;
 }
 angular.module('repository').factory('RepositoryContext', RepositoryContextFactory);
 RepositoryContextFactory.$inject = [
     'EventEmitter',
-    'Pagination',
-    'utils'
+    'utils',
+    'RepositoryContextFilter',
+    'RepositoryContextSorting',
+    'RepositoryContextPagination'
 ];
-function RepositoryContextFiltersFactory(EventEmitter, utils) {
-    function ContextFilters(data) {
+function RepositoryContextFilterFactory(EventEmitter, utils) {
+    function RepositoryContextFilter() {
         EventEmitter.call(this);
         this.$$filters = [];
     }
-    var prototype = {
-        add: addFilters,
-        toJSON: toJSON,
-        toArray: toArray,
-        where: where,
-        getFilter: getFilter
+    RepositoryContextFilter.create = function (filters) {
+        var instance = new RepositoryContextFilter();
+        instance.import(filters);
+        return instance;
     };
     var operators = {
         EQ: '=',
@@ -246,8 +184,21 @@ function RepositoryContextFiltersFactory(EventEmitter, utils) {
         GTE: '>=',
         IN: 'in'
     };
+    var operatorsArray = Object.keys(operators).map(function (key) {
+        return operators[key];
+    });
+    var prototype = {
+        import: addFilterList,
+        toJSON: toJSON,
+        toArray: toArray,
+        where: where,
+        getFilter: getFilter,
+        remove: removeFilter,
+        reset: reset,
+        operators: operators
+    };
     utils.merge(prototype, operators);
-    prototype.operators = operators;
+    utils.merge(RepositoryContextFilter, operators);
     function toJSON() {
         return this.$$filters.slice();
     }
@@ -268,13 +219,11 @@ function RepositoryContextFiltersFactory(EventEmitter, utils) {
                 value: filter[2]
             };
         }
-        if (typeof filter !== 'object')
-            return;
-        if ('name' in filter && 'value' in filter && 'operator' in filter) {
+        if (typeof filter === 'object' && filter !== null && 'name' in filter && 'value' in filter && 'operator' in filter) {
             this.$$filters.push(filter);
         }
     }
-    function addFilters(filters) {
+    function addFilterList(filters) {
         if (!Array.isArray(filters))
             return;
         filters.forEach(addFilter, this);
@@ -284,15 +233,18 @@ function RepositoryContextFiltersFactory(EventEmitter, utils) {
             value = operator;
             operator = operators.EQ;
         }
+        if (operatorsArray.indexOf(operator) === -1)
+            return;
         addFilter.call(this, [
             name,
             operator,
             value
         ]);
+        this.emit('update', this);
     }
     function getFilter(name) {
         var found;
-        this.$$filters.some(function (filter, index, array) {
+        this.$$filters.some(function (filter) {
             if (filter.name === name) {
                 found = filter;
                 return true;
@@ -300,174 +252,336 @@ function RepositoryContextFiltersFactory(EventEmitter, utils) {
         });
         return found;
     }
-    utils.inherits(ContextFilters, EventEmitter, prototype);
-    return ContextFilters;
+    function reset() {
+        this.$$filters = [];
+    }
+    function removeFilter(name) {
+        if (!name)
+            return;
+        this.$$filters = this.$$filters.filter(function (filter) {
+            return filter.name !== name;
+        });
+    }
+    utils.inherits(RepositoryContextFilter, EventEmitter, prototype);
+    return RepositoryContextFilter;
 }
-angular.module('repository').factory('RepositoryContextFilters', RepositoryContextFiltersFactory);
-RepositoryContextFiltersFactory.$inject = [
+angular.module('repository').factory('RepositoryContextFilter', RepositoryContextFilterFactory);
+RepositoryContextFilterFactory.$inject = [
     'EventEmitter',
     'utils'
 ];
-function DataProviderFactory($http, $q) {
-    function fetch() {
-        params = { params: context.toJSON() };
-        return $http.get(this.endpoint, params).then(function (response) {
-            var result = response.data, list = [], Model = repository.model;
-            context.pagination.setCount(result.count);
-            if (angular.isArray(result.items) && result.items.length) {
-                list = result.items.map(function (item) {
-                    return new Model(item);
-                });
+function RepositoryContextPaginationFactory(utils, EventEmitter) {
+    var paginationDefaults = {
+        count: 0,
+        currentPage: 1,
+        itemsPerPage: 10
+    };
+    function RepositoryContextPagination() {
+        EventEmitter.call(this);
+        this.reset();
+    }
+    RepositoryContextPagination.defaults = paginationDefaults;
+    RepositoryContextPagination.create = function (state) {
+        var instance = new RepositoryContextPagination();
+        if (state) {
+            instance.setState(state);
+        }
+        return instance;
+    };
+    var prototype = {
+        reset: function () {
+            utils.merge(this, RepositoryContextPagination.defaults);
+            this.pageCount = 0;
+        },
+        next: function () {
+            if (!this.hasNext())
+                return false;
+            return goToPage.call(this, this.currentPage + 1);
+        },
+        previous: function () {
+            if (!this.hasPrevious())
+                return false;
+            return goToPage.call(this, this.currentPage - 1);
+        },
+        first: function () {
+            if (!this.hasPrevious())
+                return false;
+            return goToPage.call(this, 1);
+        },
+        last: function () {
+            if (!this.hasNext())
+                return false;
+            return goToPage.call(this, this.pageCount);
+        },
+        goToPage: function (page, limit) {
+            if (limit) {
+                this.itemsPerPage = Number(limit);
+                this.setCount(this.count);
             }
-            context.setItems(list);
+            return goToPage.call(this, page);
+        },
+        hasNext: function () {
+            return this.currentPage < this.pageCount;
+        },
+        hasPrevious: function () {
+            return this.currentPage > 1;
+        },
+        setCount: function (count) {
+            this.count = count;
+            this.pageCount = this.itemsPerPage > 0 ? Math.ceil(this.count / this.itemsPerPage) : 0;
+            return this;
+        },
+        toJSON: function () {
+            return {
+                count: this.count,
+                currentPage: this.currentPage,
+                itemsPerPage: this.itemsPerPage
+            };
+        },
+        setState: function (state) {
+            if (!state || typeof state !== 'object')
+                return;
+            var page, limit, count;
+            if ('itemsPerPage' in state) {
+                limit = Number(state.itemsPerPage) | 0;
+                this.itemsPerPage = limit > 0 ? limit : 0;
+            }
+            if ('count' in state) {
+                count = Number(state.count) | 0;
+                this.setCount(count > 0 ? count : 0);
+            }
+            if ('currentPage' in state) {
+                page = Number(state.currentPage) | 0;
+                this.currentPage = page > 0 ? page : 1;
+            }
+        }
+    };
+    function goToPage(page) {
+        if (!page)
+            return false;
+        this.currentPage = page;
+        this.emit('update', this);
+        return true;
+    }
+    utils.inherits(RepositoryContextPagination, EventEmitter, prototype);
+    return RepositoryContextPagination;
+}
+angular.module('repository').factory('RepositoryContextPagination', RepositoryContextPaginationFactory);
+RepositoryContextPaginationFactory.$inject = [
+    'utils',
+    'EventEmitter'
+];
+function RepositoryContextSortingFactory(EventEmitter, utils) {
+    function RepositoryContextSorting() {
+        this.$$sorting = [];
+    }
+    RepositoryContextSorting.create = function (sorting) {
+        var instance = new RepositoryContextSorting();
+        instance.import(sorting);
+        return instance;
+    };
+    var directions = {
+        ASC: 'asc',
+        DESC: 'desc'
+    };
+    var prototype = {
+        import: addSortingList,
+        sort: sort,
+        invert: invert,
+        remove: removeSorting,
+        reset: reset,
+        toJSON: toJSON,
+        toArray: toArray,
+        getSorting: getSorting,
+        directions: directions
+    };
+    utils.merge(prototype, directions);
+    utils.merge(RepositoryContextSorting, directions);
+    function toJSON() {
+        return this.$$sorting.slice();
+    }
+    function toArray() {
+        return this.$$sorting.map(function (sort) {
+            return [
+                sort.name,
+                sort.direction
+            ];
         });
     }
+    function addSorting(sorting) {
+        if (Array.isArray(sorting)) {
+            sorting = {
+                name: sorting[0],
+                direction: sorting[1]
+            };
+        }
+        if (typeof sorting === 'object' && sorting !== null && 'name' in sorting && 'direction' in sorting) {
+            this.$$sorting.push(sorting);
+        }
+    }
+    function sort(name, direction) {
+        if (arguments.length === 1) {
+            direction = directions.ASC;
+        }
+        addSorting.call(this, [
+            name,
+            direction
+        ]);
+        this.emit('update', this);
+    }
+    function invert(name) {
+        this.$$sorting.some(function (sort) {
+            if (sort.name === name) {
+                sort.direction = sort.direction === directions.ASC ? directions.DESC : directions.ASC;
+                return true;
+            }
+        });
+    }
+    function removeSorting(name) {
+        if (!name)
+            return;
+        this.$$sorting = this.$$sorting.filter(function (sort) {
+            return sort.name !== name;
+        });
+    }
+    function getSorting(name) {
+        var found;
+        this.$$sorting.some(function (sort) {
+            if (sort.name === name) {
+                found = sort;
+                return true;
+            }
+        });
+        return found;
+    }
+    function reset() {
+        this.$$sorting = [];
+    }
+    function addSortingList(sortingList) {
+        if (!Array.isArray(sortingList))
+            return;
+        sortingList.forEach(addSorting, this);
+    }
+    utils.inherits(RepositoryContextSorting, EventEmitter, prototype);
+    return RepositoryContextSorting;
 }
-function RepositoryFactory($http, $q, RepositoryContext, ModelFactory, EventEmitter, utils) {
+angular.module('repository').factory('RepositoryContextSorting', RepositoryContextSortingFactory);
+RepositoryContextSortingFactory.$inject = [
+    'EventEmitter',
+    'utils'
+];
+function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig) {
     function Repository(config) {
-        EventEmitter.call(this);
+        if (config instanceof RepositoryConfig === false) {
+            throw new Error('Invalid config');
+        }
         this.contexts = {};
-        this.endpoint = config.endpoint;
-        this.model = ModelFactory.getModel(config.model);
+        this.config = config;
+        this.dataProvider = config.dataProvider;
+        this.name = config.name;
+        EventEmitter.call(this);
     }
-    function updateContext(context) {
-        var repository = this;
-    }
-    function getContext(name) {
-        return name in this.contexts ? this.contexts[name] : null;
-    }
+    var prototype = {
+        createContext: createContext,
+        removeContext: removeContext,
+        getContext: getContext,
+        updateContext: updateContext,
+        findOne: findOne,
+        save: save,
+        remove: remove
+    };
+    var repositoryEvents = {
+        UPDATE: 'update',
+        CREATE: 'create',
+        REMOVE: 'remove'
+    };
+    utils.merge(prototype, repositoryEvents);
     function createContext(name) {
-        if (name in this.contexts === false) {
-            var context = new RepositoryContext(name), _updateContext = updateContext.bind(this);
-            context.on('update', _updateContext);
+        var self = this, context;
+        if (name in self.contexts === false) {
+            context = new RepositoryContext(name);
+            context.on('update', function (context) {
+                self.updateContext(context);
+            });
             this.contexts[name] = context;
         }
         return this.contexts[name];
     }
+    function getContext(name) {
+        return name in this.contexts ? this.contexts[name] : null;
+    }
+    function updateContext(context) {
+        var config = this.config, state = context.toJSON();
+        this.dataProvider.findAll(config.endpoint, state).then(function (data) {
+            context.setData(data);
+        }).catch(function (error) {
+            context.setError(error);
+        });
+    }
     function removeContext(name) {
         delete this.contexts[name];
     }
-    utils.inherits(Repository, EventEmitter, {
-        createContext: createContext,
-        getContext: getContext,
-        updateContext: updateContext,
-        removeContext: removeContext
-    });
+    function findOne(id) {
+        if (!this.dataProvider.canGet(this.config.endpoint)) {
+            return $q.reject();
+        }
+        return this.dataProvider.findOne(this.config.endpoint, id);
+    }
+    function remove(entity) {
+        if (!this.dataProvider.canRemove(this.config.endpoint)) {
+            return $q.reject();
+        }
+        var service = this;
+        return service.dataProvider.remove(this.config.endpoint, entity).then(function (response) {
+            service.emit(service.REMOVE, entity);
+            return response;
+        });
+    }
+    function save(entity) {
+        if (!this.dataProvider.canSave(this.config.endpoint)) {
+            return $q.reject();
+        }
+        var self = this;
+        return this.dataProvider.save(this.config.endpoint, entity).then(function (response) {
+            self.emit(self.UPDATE, entity);
+            return response;
+        });
+    }
+    utils.inherits(Repository, EventEmitter, prototype);
+    Repository.extend = function (prototype) {
+        return utils.extend(Repository, prototype);
+    };
     return Repository;
 }
 angular.module('repository').factory('Repository', RepositoryFactory);
 RepositoryFactory.$inject = [
-    '$http',
     '$q',
+    'EventEmitter',
+    'utils',
     'RepositoryContext',
-    'ModelFactory',
-    'EventEmitter',
-    'utils'
+    'RepositoryConfig'
 ];
-function ServiceClassFactory($q, $http, EventEmitter, inherits) {
-    function Service(config) {
-        EventEmitter.call(this);
-        config = angular.isObject(config) && config || { endpoints: config };
-        var endpoints = config.endpoints;
-        if (angular.isString(endpoints)) {
-            endpoints = {
-                index: endpoints,
-                get: endpoints,
-                post: endpoints,
-                put: endpoints,
-                'delete': endpoints
-            };
-        } else if (angular.isObject(endpoints)) {
-            var defaultEndpoint = endpoints.get || endpoints.index;
-            endpoints = {
-                index: endpoints.index || defaultEndpoint,
-                get: endpoints.get || defaultEndpoint,
-                post: endpoints.post || defaultEndpoint,
-                put: endpoints.put || endpoints.get || defaultEndpoint,
-                'delete': endpoints.delete || defaultEndpoint
-            };
+function RepositoryConfigFactory(DataProviderInterface, utils) {
+    function RepositoryConfig(config) {
+        if (!config.endpoint) {
+            throw new Error('Invalid endpoint');
         }
-        this.endpoints = endpoints;
-        this.model = config.model;
+        if (config.dataProvider instanceof DataProviderInterface === false) {
+            throw new Error('Invalid data provider');
+        }
+        utils.merge(this, config);
     }
-    function findOne(id) {
-        if (this.endpoints.get === false) {
-            return $q.reject();
-        }
-        var self = this;
-        return $http.get(this.endpoints.get + '/' + id).then(function (response) {
-            var item = response.data;
-            if (item && item.id && self.model) {
-                item = new self.model(item);
-            }
-            return item || null;
-        });
-    }
-    function update(item) {
-        if (this.endpoints.put === false) {
-            return $q.reject();
-        }
-        var service = this;
-        return $http.post(this.endpoints.put + '/' + item.id, item).then(function (response) {
-            service.emit(service.CREATE, item);
-            return response;
-        });
-    }
-    function create(item) {
-        if (this.endpoints.post === false) {
-            return $q.reject();
-        }
-        var service = this;
-        return $http.post(this.endpoints.post, item).then(function (response) {
-            service.emit(service.UPDATE, item);
-            return response;
-        });
-    }
-    function remove(item) {
-        if (this.endpoints.delete === false) {
-            return $q.reject();
-        }
-        var service = this;
-        return $http.delete(this.endpoints.delete + '/' + item.id, item).then(function (response) {
-            service.emit(service.REMOVE, item);
-            return response;
-        });
-    }
-    function save(item) {
-        if (item.id) {
-            return this.update(item);
-        }
-        return this.create(item);
-    }
-    inherits(Service, EventEmitter, {
-        UPDATE: 'update',
-        CREATE: 'create',
-        REMOVE: 'remove',
-        findOne: findOne,
-        update: update,
-        create: create,
-        remove: remove,
-        save: save
-    });
-    Service.extend = function (properties) {
-        function NewService(config) {
-            Service.call(this, config);
-        }
-        inherits(NewService, Service, properties);
-        return NewService;
-    };
-    return Service;
+    return RepositoryConfig;
 }
-angular.module('repository').factory('Service', ServiceClassFactory);
-ServiceClassFactory.$inject = [
-    '$q',
-    '$http',
-    'EventEmitter',
-    'inherits'
+angular.module('repository').factory('RepositoryConfig', RepositoryConfigFactory);
+RepositoryConfigFactory.$inject = [
+    'DataProviderInterface',
+    'utils'
 ];
 function utilsFactory() {
     var utils = {};
     utils.inherits = inherits;
+    utils.extend = extend;
     utils.merge = merge;
     return utils;
     function merge(destination, source) {
@@ -481,11 +595,21 @@ function utilsFactory() {
     }
     function inherits(NewClass, SuperClass, attributes) {
         var prototype = SuperClass.prototype, childPrototype = Object.create(prototype);
-        Object.keys(attributes).forEach(function (key) {
-            childPrototype[key] = attributes[key];
-        });
+        if (attributes) {
+            Object.keys(attributes).forEach(function (key) {
+                childPrototype[key] = attributes[key];
+            });
+        }
+        childPrototype.__super__ = SuperClass.prototype;
         NewClass.prototype = childPrototype;
         NewClass.prototype.constructor = NewClass;
+    }
+    function extend(SuperClass, prototype) {
+        function SubClass() {
+            SuperClass.apply(this, arguments);
+        }
+        inherits(SubClass, SuperClass, prototype);
+        return SubClass;
     }
 }
 angular.module('repository').factory('utils', utilsFactory);

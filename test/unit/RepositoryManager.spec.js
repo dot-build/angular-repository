@@ -4,7 +4,7 @@ describe('RepositoryManager', function() {
 	beforeEach(module('repository'));
 
 	beforeEach(inject(function(DataProviderInterface, RepositoryConfig) {
-		DummyProvider = DataProviderInterface.implement();
+		DummyProvider = DataProviderInterface.extend();
 
 		repositoryConfig = new RepositoryConfig({
 			name: 'test',
@@ -61,6 +61,24 @@ describe('RepositoryManager', function() {
 			expect(addRepository).not.toThrow();
 			expect(addRepository).toThrow();
 			expect(RepositoryManager.hasRepository(repositoryConfig.name)).toBe(true);
+		}));
+
+		it('should NOT register a repository without a valid config', inject(function(RepositoryManager) {
+			function registerInvalidConfig() {
+				RepositoryManager.addRepository(null);
+			}
+
+			expect(registerInvalidConfig).toThrow();
+		}));
+	});
+
+	describe('#getRepository(String name)', function() {
+		it('should return a previously registered repository', inject(function(RepositoryManager) {
+			var registeredRepository = RepositoryManager.addRepository(repositoryConfig);
+			var repository = RepositoryManager.getRepository(repositoryConfig.name);
+
+			expect(repository).not.toBeFalsy();
+			expect(repository).toBe(registeredRepository);
 		}));
 	});
 });

@@ -100,7 +100,7 @@ describe('Repository', function() {
 		var instance;
 
 		beforeEach(inject(function(DataProviderInterface, RepositoryConfig, Repository) {
-			DataProvider = DataProviderInterface.implement();
+			DataProvider = DataProviderInterface.extend();
 
 			var config = new RepositoryConfig({
 				endpoint: '/resource',

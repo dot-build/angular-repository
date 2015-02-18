@@ -4,7 +4,7 @@
 function DataProviderInterfaceFactory(utils, $q) {
 	function DataProviderInterface() {}
 
-	function implement(prototype) {
+	function extend(prototype) {
 		return utils.extend(DataProviderInterface, prototype);
 	}
 
@@ -14,7 +14,7 @@ function DataProviderInterfaceFactory(utils, $q) {
 		};
 	}
 
-	DataProviderInterface.implement = implement;
+	DataProviderInterface.extend = extend;
 
 	DataProviderInterface.prototype = {
 		findOne: notImplemented('findOne'),
