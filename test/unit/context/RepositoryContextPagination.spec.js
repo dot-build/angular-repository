@@ -109,7 +109,7 @@ describe('RepositoryContextPagination', function() {
 		});
 	});
 
-	describe('.pageCount', function() {
+	describe('#pageCount', function() {
 		it('should have the current page count', function() {
 			instance.setState({
 				count: 20,

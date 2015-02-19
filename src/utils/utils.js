@@ -15,12 +15,9 @@ function utilsFactory() {
 	 * @param {Object} source
 	 */
 	function merge(destination, source) {
-		var key;
-
-		for (key in source) {
-			if (!source.hasOwnProperty(key)) continue;
+		Object.keys(source).forEach(function(key) {
 			destination[key] = source[key];
-		}
+		});
 
 		return destination;
 	}

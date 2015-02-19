@@ -80,5 +80,10 @@ describe('RepositoryManager', function() {
 			expect(repository).not.toBeFalsy();
 			expect(repository).toBe(registeredRepository);
 		}));
+
+		it('should return NULL if the repository does not exists', inject(function(RepositoryManager) {
+			var result = RepositoryManager.getRepository('foo');
+			expect(result).toBe(null);
+		}));
 	});
 });

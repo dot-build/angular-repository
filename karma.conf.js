@@ -14,10 +14,10 @@ module.exports = function(config) {
 		browsers: ['PhantomJS'],
 		frameworks: ['jasmine'],
 		port: 9800,
-		// NOTE: the "**/" portion is essential to get the coverage results
+
 		preprocessors: {
-			'**/src/**/*.js': ['ngannotations', 'coverage'],
-			'**/integration/**/*.js': ['ngannotations']
+			'src/**/!(*EventEmitter).js': ['ngannotations', 'coverage'],
+			'integration/**/*.js': ['ngannotations']
 		},
 
 		coverageReporter: {

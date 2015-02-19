@@ -3,7 +3,7 @@ describe('Repository', function() {
 	beforeEach(module('repository'));
 
 	// tests with a mocked DataProviderInterface
-	describe('-', function() {
+	describe(' ', function() {
 		var instance;
 
 		function DataProviderInterface() {}
@@ -95,7 +95,7 @@ describe('Repository', function() {
 		});
 	});
 
-	describe('.', function() {
+	describe('  ', function() {
 		var DataProvider;
 		var instance;
 

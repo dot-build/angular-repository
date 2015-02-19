@@ -13,4 +13,9 @@ test:
 watch:
 	./node_modules/gulp/bin/gulp.js default
 
-.PHONY: all tdd test watch
+apidoc:
+	find ./test/unit -type f -name "*.spec.js" | xargs cat | grep describe | tee a.tmp;
+	cat a.tmp | sed s/\',\ function\(\)\ \{// | sed -r s/describe[\(]+[\']+[\#\:]+// | sed -r s/^describe[\(]+[\']+/\\n\\n\#\#\ / | tee API.md
+	rm a.tmp;
+
+.PHONY: all tdd test watch apidoc

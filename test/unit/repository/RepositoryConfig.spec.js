@@ -1,7 +1,7 @@
 describe('RepositoryConfig', function() {
 	beforeEach(module('repository'));
 
-	describe('#constructor', function() {
+	describe('#constructor(Object options)', function() {
 		it('should NOT continue without a valid DataProvider', inject(function(RepositoryConfig) {
 			function invalidDataProvider() {
 				return new RepositoryConfig({
