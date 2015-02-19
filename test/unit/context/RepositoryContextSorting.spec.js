@@ -100,6 +100,26 @@ describe('RepositoryContextSorting', function() {
 			expect(instance.$$sorting[0].name).toBe('name');
 			expect(instance.$$sorting[0].direction).toBe(instance.ASC);
 		});
+
+		it('should only invert the direction if the direction is not provided and the filter exists', function() {
+			instance.sort('name');
+
+			expect(instance.$$sorting.length).toBe(1);
+			expect(instance.$$sorting[0].name).toBe('name');
+			expect(instance.$$sorting[0].direction).toBe(instance.ASC);
+
+			instance.sort('name');
+
+			expect(instance.$$sorting.length).toBe(1);
+			expect(instance.$$sorting[0].name).toBe('name');
+			expect(instance.$$sorting[0].direction).toBe(instance.DESC);
+
+			instance.sort('name');
+
+			expect(instance.$$sorting.length).toBe(1);
+			expect(instance.$$sorting[0].name).toBe('name');
+			expect(instance.$$sorting[0].direction).toBe(instance.ASC);
+		});
 	});
 
 	describe('#invert(String name)', function() {
@@ -127,7 +147,7 @@ describe('RepositoryContextSorting', function() {
 
 			instance.remove('age');
 
-			expect(instance.getSorting('age')).toBe(undefined);
+			expect(instance.getSorting('age')).toBe(null);
 		});
 	});
 
@@ -173,6 +193,28 @@ describe('RepositoryContextSorting', function() {
 
 			expect(ageSorting[0]).toBe('age');
 			expect(ageSorting[1]).toBe(instance.DESC);
+		});
+	});
+
+	describe('#getSorting(String name)', function() {
+		it('should return a sorting rule by name if it exists, or null instead', function() {
+			expect(instance.getSorting('name')).toBe(null);
+			instance.sort('name');
+
+			expect(instance.getSorting('name')).toEqual({
+				name: 'name',
+				direction: instance.ASC
+			});
+		});
+	});
+
+	describe('#hasSorting(String name)', function() {
+		it('should return whether the sorting rule exists', function() {
+			expect(instance.hasSorting('name')).toBe(false);
+			instance.sort('name');
+			expect(instance.hasSorting('name')).toBe(true);
+			instance.remove('name');
+			expect(instance.hasSorting('name')).toBe(false);
 		});
 	});
 

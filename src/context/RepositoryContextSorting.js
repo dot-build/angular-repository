@@ -27,6 +27,7 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
 		toJSON: toJSON,
 		toArray: toArray,
 		getSorting: getSorting,
+		hasSorting: hasSorting,
 
 		directions: directions
 	};
@@ -53,7 +54,11 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
 		}
 
 		if (typeof sorting === 'object' && sorting !== null && 'name' in sorting && 'direction' in sorting) {
-			this.$$sorting.push(sorting);
+			if (this.hasSorting(sorting.name)) {
+				this.invert(sorting.name);
+			} else {
+				this.$$sorting.push(sorting);
+			}
 		}
 
 	}
@@ -85,7 +90,7 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
 	}
 
 	function getSorting(name) {
-		var found;
+		var found = null;
 
 		this.$$sorting.some(function(sort) {
 			if (sort.name === name) {
@@ -95,6 +100,12 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
 		});
 
 		return found;
+	}
+
+	function hasSorting(name) {
+		return this.$$sorting.some(function(sort) {
+			return sort.name === name;
+		});
 	}
 
 	function reset() {
