@@ -3,3 +3,4 @@ test/coverage
 dist/*.min.js
 *.sublime*
 tmp
+vendor
