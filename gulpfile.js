@@ -43,10 +43,10 @@ gulp.task('min', function() {
 });
 
 var vendorFiles = [
-	'vendor/angular.js',
-	'vendor/angular-mocks.js',
-	'vendor/es5-shim.min.js',
-	'vendor/EventEmitter.js',
+	'vendor/angular/angular.js',
+	'vendor/angular-mocks/angular-mocks.js',
+	'vendor/es5-shim/es5-shim.js',
+	'vendor/da-event-emitter/src/EventEmitter.js',
 	'vendor/JSONHttpRequest.js',
 	'vendor/jasmine-fixtures.js'
 ];
