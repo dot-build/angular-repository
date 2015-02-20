@@ -135,7 +135,7 @@ describe('RepositoryContext', function() {
 		});
 	});
 
-	describe('#toJSON', function() {
+	describe('#toJSON()', function() {
 		it('should return an object literal with sorting, pagination and filtering state', inject(function(RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination, RepositoryContext) {
 			var filters = ['name', RepositoryContextFilter.EQ, 'Bob'];
 			var pagination = {
@@ -170,7 +170,7 @@ describe('RepositoryContext', function() {
 	});
 
 	describe('#setData(Object dto)', function() {
-		it('should update the context data/state and return true', function() {
+		it('should update the context data/state, emit "change" event and return true', function() {
 			expect(context.data).toBe(null);
 			expect(context.error).toBe(null);
 
@@ -188,6 +188,8 @@ describe('RepositoryContext', function() {
 				}]
 			};
 
+			spyOn(context, 'emit');
+
 			context.error = {};
 			var response = context.setData(dto);
 
@@ -198,9 +200,10 @@ describe('RepositoryContext', function() {
 			expect(context.data[1].name).toBe('Bob');
 			expect(context.error).toBe(null);
 			expect(response).toBe(true);
+			expect(context.emit).toHaveBeenCalledWith('change', context.data);
 		});
 
-		it('should NOT change the context data and change the context error if the DTO format is invalid, returning false', function() {
+		it('should NOT change the context data and change the context error if the DTO format is invalid, emit "error" and return false', function() {
 			// a valid DTO must have a "data" property that is applied to context
 
 			expect(context.data).toBe(null);
@@ -210,33 +213,45 @@ describe('RepositoryContext', function() {
 				meta: {}
 			};
 
+			spyOn(context, 'emit');
+
 			var response = context.setData(dto);
 			expect(response).toBe(false);
 
 			expect(context.data).toBe(null);
 			expect(context.error).toBe(context.INVALID_RESPONSE);
 
+			expect(context.emit).toHaveBeenCalledWith('error', context.INVALID_RESPONSE);
+
 			dto.data = [];
+
+			context.emit.calls.reset();
 
 			var response = context.setData(dto);
 			expect(response).toBe(true);
 
 			expect(context.data).toBe(dto.data);
 			expect(context.error).toBe(null);
+
+			expect(context.emit).toHaveBeenCalledWith('change', context.data);
 		});
 	});
 
 	describe('#setError(Mixed error)', function() {
-		it('should set the error property with the errors of last call', function() {
+		it('should set the error property with the errors of last call and emit "error" event with the errors', function() {
 			expect(context.error).toBe(null);
 			expect(context.data).toBe(null);
 
 			var errors = ['An error happened'];
 
+			spyOn(context, 'emit');
+
 			context.setError(errors);
 
 			expect(context.error).toBe(errors);
 			expect(context.data).toBe(null);
+
+			expect(context.emit).toHaveBeenCalledWith('error', errors);
 		});
 	});
 });

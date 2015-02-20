@@ -40,7 +40,7 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
 
 	function setData(dataTransferObject) {
 		if (!dataTransferObject || typeof dataTransferObject !== 'object' || 'data' in dataTransferObject === false) {
-			this.error = this.INVALID_RESPONSE;
+			this.setError(this.INVALID_RESPONSE);
 			return false;
 		}
 
@@ -57,11 +57,14 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
 		this.data = dataTransferObject.data || null;
 		this.error = null;
 
+		this.emit('change', this.data);
+
 		return true;
 	}
 
 	function setError(error) {
 		this.error = error;
+		this.emit('error', error);
 	}
 
 	function reset() {
