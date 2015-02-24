@@ -14,7 +14,7 @@ describe('RepositoryContextFilter', function() {
 
 			whereToLook.forEach(function(place) {
 				constants.forEach(function(constantName, index) {
-					expect(place[constantName]).not.toBe(undefined);
+					expect(place[constantName]).toBe(values[index]);
 				});
 			});
 		}));
