@@ -4,14 +4,6 @@ angular.module('repository', ['EventEmitter']);
 function DataProviderInterfaceFactory(utils, $q) {
     function DataProviderInterface() {
     }
-    function extend(prototype) {
-        return utils.extend(DataProviderInterface, prototype);
-    }
-    function notImplemented(method) {
-        return function () {
-            return $q.reject(new Error(method + '() is not implemented'));
-        };
-    }
     DataProviderInterface.extend = extend;
     DataProviderInterface.prototype = {
         findOne: notImplemented('findOne'),
@@ -23,6 +15,14 @@ function DataProviderInterfaceFactory(utils, $q) {
         canRemove: canDoMethod,
         canList: canDoMethod
     };
+    function extend(prototype) {
+        return utils.extend(DataProviderInterface, prototype);
+    }
+    function notImplemented(method) {
+        return function () {
+            return $q.reject(new Error(method + '() is not implemented'));
+        };
+    }
     function canDoMethod() {
         return true;
     }
@@ -61,7 +61,9 @@ function RepositoryManagerProvider($provide) {
                 instance = new Repository(config);
             }
             repositoryMap[name] = instance;
-            $provide.value(name + repositoryManager.suffix, instance);
+            if (config.autoRegister !== false) {
+                $provide.value(name + repositoryManager.suffix, instance);
+            }
             return instance;
         }
         function getRepository(name) {
@@ -112,7 +114,7 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
     }
     function setData(dataTransferObject) {
         if (!dataTransferObject || typeof dataTransferObject !== 'object' || 'data' in dataTransferObject === false) {
-            this.error = this.INVALID_RESPONSE;
+            this.setError(this.INVALID_RESPONSE);
             return false;
         }
         var page = dataTransferObject.meta;
@@ -125,10 +127,12 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
         }
         this.data = dataTransferObject.data || null;
         this.error = null;
+        this.emit('change', this.data);
         return true;
     }
     function setError(error) {
         this.error = error;
+        this.emit('error', error);
     }
     function reset() {
         this.$$filters.reset();
@@ -180,12 +184,14 @@ function RepositoryContextFilterFactory(EventEmitter, utils) {
     };
     var operators = {
         EQ: '=',
-        NE: '!=',
         LT: '<',
         LTE: '<=',
         GT: '>',
         GTE: '>=',
-        IN: 'in'
+        IN: 'in',
+        ST: '^',
+        END: '$',
+        LK: '~'
     };
     var operatorsArray = Object.keys(operators).map(function (key) {
         return operators[key];
@@ -396,6 +402,7 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
         toJSON: toJSON,
         toArray: toArray,
         getSorting: getSorting,
+        hasSorting: hasSorting,
         directions: directions
     };
     utils.merge(prototype, directions);
@@ -419,7 +426,11 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
             };
         }
         if (typeof sorting === 'object' && sorting !== null && 'name' in sorting && 'direction' in sorting) {
-            this.$$sorting.push(sorting);
+            if (this.hasSorting(sorting.name)) {
+                this.invert(sorting.name);
+            } else {
+                this.$$sorting.push(sorting);
+            }
         }
     }
     function sort(name, direction) {
@@ -448,7 +459,7 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
         });
     }
     function getSorting(name) {
-        var found;
+        var found = null;
         this.$$sorting.some(function (sort) {
             if (sort.name === name) {
                 found = sort;
@@ -456,6 +467,11 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
             }
         });
         return found;
+    }
+    function hasSorting(name) {
+        return this.$$sorting.some(function (sort) {
+            return sort.name === name;
+        });
     }
     function reset() {
         this.$$sorting = [];
@@ -513,7 +529,13 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
     function getContext(name) {
         return name in this.contexts ? this.contexts[name] : null;
     }
+    function removeContext(name) {
+        delete this.contexts[name];
+    }
     function updateContext(context) {
+        if (!this.dataProvider.canList(this.config.endpoint)) {
+            return $q.reject();
+        }
         var config = this.config, state = context.toJSON();
         this.dataProvider.findAll(config.endpoint, state).then(function (data) {
             context.setData(data);
@@ -521,17 +543,14 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
             context.setError(error);
         });
     }
-    function removeContext(name) {
-        delete this.contexts[name];
-    }
     function findOne(id) {
-        if (!this.dataProvider.canGet(this.config.endpoint)) {
+        if (!this.dataProvider.canGet(this.config.endpoint, id)) {
             return $q.reject();
         }
         return this.dataProvider.findOne(this.config.endpoint, id);
     }
     function remove(entity) {
-        if (!this.dataProvider.canRemove(this.config.endpoint)) {
+        if (!this.dataProvider.canRemove(this.config.endpoint, entity)) {
             return $q.reject();
         }
         var service = this;
@@ -541,7 +560,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         });
     }
     function save(entity) {
-        if (!this.dataProvider.canSave(this.config.endpoint)) {
+        if (!this.dataProvider.canSave(this.config.endpoint, entity)) {
             return $q.reject();
         }
         var self = this;
@@ -588,12 +607,9 @@ function utilsFactory() {
     utils.merge = merge;
     return utils;
     function merge(destination, source) {
-        var key;
-        for (key in source) {
-            if (!source.hasOwnProperty(key))
-                continue;
+        Object.keys(source).forEach(function (key) {
             destination[key] = source[key];
-        }
+        });
         return destination;
     }
     function inherits(NewClass, SuperClass, attributes) {
