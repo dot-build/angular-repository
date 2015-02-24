@@ -4,16 +4,6 @@
 function DataProviderInterfaceFactory(utils, $q) {
 	function DataProviderInterface() {}
 
-	function extend(prototype) {
-		return utils.extend(DataProviderInterface, prototype);
-	}
-
-	function notImplemented(method) {
-		return function() {
-			return $q.reject(new Error(method + '() is not implemented'));
-		};
-	}
-
 	DataProviderInterface.extend = extend;
 
 	DataProviderInterface.prototype = {
@@ -27,6 +17,16 @@ function DataProviderInterfaceFactory(utils, $q) {
 		canRemove: canDoMethod,
 		canList: canDoMethod
 	};
+
+	function extend(prototype) {
+		return utils.extend(DataProviderInterface, prototype);
+	}
+
+	function notImplemented(method) {
+		return function() {
+			return $q.reject(new Error(method + '() is not implemented'));
+		};
+	}
 
 	function canDoMethod() {
 		return true;

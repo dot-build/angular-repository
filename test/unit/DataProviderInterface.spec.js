@@ -1,22 +1,21 @@
 describe('DataProviderInterface', function() {
+	var instance;
 
 	beforeEach(module('repository'));
+	beforeEach(inject(function(DataProviderInterface) {
+		var Implementation = DataProviderInterface.extend();
+		instance = new Implementation();
+	}));
 
 	describe('::extend', function() {
 		it('should have a static method to extend the provider interface', inject(function(DataProviderInterface) {
 			expect(typeof DataProviderInterface.extend).toBe('function');
-			var SubClass = DataProviderInterface.extend({});
-			var instance = new SubClass();
-
 			expect(instance instanceof DataProviderInterface).toBe(true);
 		}));
 	});
 
 	describe('abstract methods', function() {
-		it('should throw exceptions if a method not implemented is called', inject(function(DataProviderInterface, $rootScope) {
-			var Implementation = DataProviderInterface.extend();
-			var instance = new Implementation();
-
+		it('should throw exceptions if a method not implemented is called', inject(function($rootScope) {
 			checkPromise(instance.findOne);
 			checkPromise(instance.findAll);
 			checkPromise(instance.remove);
@@ -38,15 +37,28 @@ describe('DataProviderInterface', function() {
 		}));
 	});
 
-	describe('can* methods', function() {
-		it('should return true as the default response', inject(function(DataProviderInterface, $rootScope) {
-			var Implementation = DataProviderInterface.extend();
-			var instance = new Implementation();
-
+	describe('canGet(endpoint, id)', function() {
+		it('should return true as the default response', function() {
 			expect(instance.canGet()).toBe(true);
-			expect(instance.canList()).toBe(true);
-			expect(instance.canSave()).toBe(true);
-			expect(instance.canRemove()).toBe(true);
-		}));
+		});
 	});
+
+	describe('canList(endpoint, id)', function() {
+		it('should return true as the default response', function() {
+			expect(instance.canList()).toBe(true);
+		});
+	});
+
+	describe('canSave(endpoint, entity)', function() {
+		it('should return true as the default response', function() {
+			expect(instance.canSave()).toBe(true);
+		});
+	});
+
+	describe('canRemove(endpoint, id)', function() {
+		it('should return true as the default response', function() {
+			expect(instance.canRemove()).toBe(true);
+		});
+	});
+
 });

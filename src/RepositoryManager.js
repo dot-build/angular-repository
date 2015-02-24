@@ -37,8 +37,10 @@ function RepositoryManagerProvider($provide) {
 
 			repositoryMap[name] = instance;
 
-			// repository is now injectable
-			$provide.value(name + repositoryManager.suffix, instance);
+			if (config.autoRegister !== false) {
+				// repository is now injectable
+				$provide.value(name + repositoryManager.suffix, instance);
+			}
 
 			return instance;
 		}
