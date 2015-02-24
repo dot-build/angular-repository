@@ -57,7 +57,15 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		return (name in this.contexts) ? this.contexts[name] : null;
 	}
 
+	function removeContext(name) {
+		delete this.contexts[name];
+	}
+
 	function updateContext(context) {
+		if (!this.dataProvider.canList(this.config.endpoint)) {
+			return $q.reject();
+		}
+
 		var config = this.config,
 			state = context.toJSON();
 
@@ -68,12 +76,8 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		});
 	}
 
-	function removeContext(name) {
-		delete this.contexts[name];
-	}
-
 	function findOne(id) {
-		if (!this.dataProvider.canGet(this.config.endpoint)) {
+		if (!this.dataProvider.canGet(this.config.endpoint, id)) {
 			return $q.reject();
 		}
 
@@ -81,7 +85,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function remove(entity) {
-		if (!this.dataProvider.canRemove(this.config.endpoint)) {
+		if (!this.dataProvider.canRemove(this.config.endpoint, entity)) {
 			return $q.reject();
 		}
 
@@ -94,7 +98,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function save(entity) {
-		if (!this.dataProvider.canSave(this.config.endpoint)) {
+		if (!this.dataProvider.canSave(this.config.endpoint, entity)) {
 			return $q.reject();
 		}
 

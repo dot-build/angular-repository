@@ -16,12 +16,14 @@ function RepositoryContextFilterFactory(EventEmitter, utils) {
 
 	var operators = {
 		EQ: '=',
-		NE: '!=',
 		LT: '<',
 		LTE: '<=',
 		GT: '>',
 		GTE: '>=',
-		IN: 'in'
+		IN: 'in',
+		ST: '^',
+		END: '$',
+		LK: '~'
 	};
 
 	var operatorsArray = Object.keys(operators).map(function(key) {

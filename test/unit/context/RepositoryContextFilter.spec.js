@@ -9,10 +9,11 @@ describe('RepositoryContextFilter', function() {
 	describe('filter operator constants', function() {
 		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositoryContextFilter) {
 			var whereToLook = [RepositoryContextFilter, instance, instance.operators],
-				constants = ['LT', 'LTE', 'GT', 'GTE', 'IN', 'EQ'];
+				constants = ['LT', 'LTE', 'GT', 'GTE', 'IN', 'EQ', 'LK', 'ST', 'END'],
+				values = ['<', '<=', '>', '>=', 'in', '=', '~', '^', '$'];
 
 			whereToLook.forEach(function(place) {
-				constants.forEach(function(constantName) {
+				constants.forEach(function(constantName, index) {
 					expect(place[constantName]).not.toBe(undefined);
 				});
 			});
