@@ -16,7 +16,7 @@ server calls and return a `Promise`. The methods are:
 * findAll(endpoint, parameters)
 * findOne(endpoint, id)
 * save(endpoint, entity)
-* remove(id)
+* remove(endpoint, id)
 
 ## Repository
 
@@ -28,7 +28,7 @@ server calls and return a `Promise`. The methods are:
 * updateContext(context)
 * findOne(endpoint, id)
 * save(endpoint, entity)
-* remove(id)
+* remove(endpoint, id)
 
 It all starts with the `RepositoryManager`, where a `Repository` is created, using a 
 `RepositoryConfig` to define its parameters. Each repository performs some operations
