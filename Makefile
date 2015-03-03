@@ -7,6 +7,12 @@ tdd:
 integration:
 	./node_modules/gulp/bin/gulp.js integration
 
+integration-tdd:
+	./node_modules/gulp/bin/gulp.js integration-tdd
+
+unit:
+	./node_modules/gulp/bin/gulp.js unit
+
 test:
 	./node_modules/gulp/bin/gulp.js test
 
@@ -18,4 +24,4 @@ apidoc:
 	cat a.tmp | sed s/\',\ function\(\)\ \{// | sed -r s/describe[\(]+[\']+[\#\:]+// | sed -r s/^describe[\(]+[\']+/\\n\\n\#\#\ / | tee API.md
 	rm a.tmp;
 
-.PHONY: all tdd test watch apidoc
+.PHONY: all tdd test watch integration apidoc

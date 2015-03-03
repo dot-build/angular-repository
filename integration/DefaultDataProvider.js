@@ -32,12 +32,12 @@ angular.module('integration').factory('DefaultDataProvider', function(DataProvid
 	var DefaultDataProvider = DataProviderInterface.extend({
 		baseUrl: '/api',
 
-		findOne: function(endpoint, id) {
-			return $http.get(this.baseUrl + endpoint + '/' + id);
+		findOne: function(resource, id) {
+			return $http.get(this.baseUrl + resource + '/' + id);
 		},
 
-		findAll: function(endpoint, contextState) {
-			var url = this.baseUrl + endpoint + '?',
+		findAll: function(resource, contextState) {
+			var url = this.baseUrl + uriMap[resource] + '?',
 				pagination = queryStringPagination(contextState.pagination),
 				filters = contextState.filters.length ? queryStringFilters(contextState.filters) : '',
 				sorting = contextState.sorting.length ? queryStringSorting(contextState.sorting) : '';
@@ -63,6 +63,10 @@ angular.module('integration').factory('DefaultDataProvider', function(DataProvid
 			});
 		}
 	});
+
+	var uriMap = {
+		Product: '/product'
+	};
 
 	return new DefaultDataProvider();
 });

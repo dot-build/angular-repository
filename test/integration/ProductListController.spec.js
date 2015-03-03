@@ -17,11 +17,11 @@ describe('ProductListController', function() {
 	}
 
 	describe('fetch a list of products', function() {
-		it('should have a list of products in the context', inject(function($rootScope, $controller, $httpBackend) {
-			var fixture = getJSONFixture('product/list.json');
-			var $scope = $rootScope.$new();
+		var fixture, matcher;
 
-			var matcher = /\/api\/products\?(.*)/;
+		beforeEach(inject(function($httpBackend) {
+			fixture = getJSONFixture('product/list.json');
+			matcher = /\/api\/product\?(.*)/;
 
 			$httpBackend.whenGET(matcher).respond(function(method, url) {
 				var match = url.match(matcher);
@@ -39,7 +39,10 @@ describe('ProductListController', function() {
 					data: fixture
 				}];
 			});
+		}));
 
+		it('should have a list of products in the context', inject(function($rootScope, $controller, $httpBackend) {
+			var $scope = $rootScope.$new();
 			$controller('ProductListController as listing', {
 				$scope: $scope
 			});
@@ -62,6 +65,22 @@ describe('ProductListController', function() {
 			expect(pagination.currentPage).toBe(1);
 			expect(pagination.itemsPerPage).toBe(10);
 			expect(pagination.count).toBe(fixture.length);
+		}));
+
+		it('should fetch a list of products with a querybuilder', inject(function(RepositoryManager, $httpBackend) {
+			var qb = RepositoryManager.createQuery();
+
+			var onSuccess = jasmine.createSpy('success'),
+				onError = jasmine.createSpy('error');
+
+			qb.from('Product').where('name', 'product');
+
+			RepositoryManager.executeQuery(qb).then(onSuccess, onError);
+			$httpBackend.flush();
+
+			// data was put in the right place
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		}));
 	});
 });

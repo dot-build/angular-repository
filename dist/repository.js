@@ -33,23 +33,84 @@ DataProviderInterfaceFactory.$inject = [
     'utils',
     '$q'
 ];
+function QueryBuilderFactory(RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination) {
+    function QueryBuilder() {
+        this.$$filters = RepositoryContextFilter.create();
+        this.$$sorting = RepositoryContextSorting.create();
+        this.$$page = RepositoryContextPagination.create();
+        this.$$repository = '';
+    }
+    function create() {
+        return new QueryBuilder();
+    }
+    function from(repository) {
+        this.$$repository = repository;
+        return this;
+    }
+    function sort(name, direction) {
+        this.$$sorting.sort(name, direction);
+        return this;
+    }
+    function where() {
+        this.$$filters.where.apply(this.$$filters, arguments);
+        return this;
+    }
+    function skip(skipValue) {
+        this.$$page.goToPage(~~(skipValue / this.$$page.itemsPerPage) + 1);
+        return this;
+    }
+    function limit(limitValue) {
+        this.$$page.setState({ itemsPerPage: limitValue });
+        return this;
+    }
+    function toJSON() {
+        return {
+            filters: this.$$filters.toJSON(),
+            pagination: this.$$page.toJSON(),
+            sorting: this.$$sorting.toJSON()
+        };
+    }
+    function getRepository() {
+        return this.$$repository;
+    }
+    var prototype = {
+        constructor: QueryBuilder,
+        getRepository: getRepository,
+        from: from,
+        where: where,
+        sort: sort,
+        skip: skip,
+        limit: limit,
+        toJSON: toJSON
+    };
+    QueryBuilder.prototype = prototype;
+    QueryBuilder.create = create;
+    QueryBuilder.operator = prototype.operator = RepositoryContextFilter.prototype.operators;
+    QueryBuilder.direction = prototype.direction = RepositoryContextSorting.prototype.directions;
+    return QueryBuilder;
+}
+angular.module('repository').factory('QueryBuilder', QueryBuilderFactory);
+QueryBuilderFactory.$inject = [
+    'RepositoryContextFilter',
+    'RepositoryContextSorting',
+    'RepositoryContextPagination'
+];
 function RepositoryManagerProvider($provide) {
-    function RepositoryManagerFactory(Repository, RepositoryConfig) {
+    function RepositoryManagerFactory(Repository, RepositoryConfig, QueryBuilder) {
         var repositoryMap = {};
         var repositoryManager = {
             addRepository: addRepository,
             hasRepository: hasRepository,
             getRepository: getRepository,
-            suffix: 'Repository'
+            suffix: 'Repository',
+            createQuery: createQuery,
+            executeQuery: executeQuery
         };
         function addRepository(config, properties) {
             if (!config || config instanceof RepositoryConfig === false) {
                 throw new Error('Invalid repository definition');
             }
             var name = config.name;
-            if (!name) {
-                throw new Error('Invalid repository name');
-            }
             if (repositoryMap.hasOwnProperty(name)) {
                 throw new Error('Repository ' + name + ' already registed');
             }
@@ -74,11 +135,22 @@ function RepositoryManagerProvider($provide) {
         function hasRepository(name) {
             return name in repositoryMap;
         }
+        function createQuery() {
+            return new QueryBuilder();
+        }
+        function executeQuery(queryBuilder) {
+            var repository = queryBuilder.getRepository();
+            if (!this.hasRepository(repository)) {
+                throw new Error('Invalid repository');
+            }
+            return this.getRepository(repository).findAll(queryBuilder);
+        }
         return repositoryManager;
     }
     this.$get = [
         'Repository',
         'RepositoryConfig',
+        'QueryBuilder',
         RepositoryManagerFactory
     ];
 }
@@ -489,7 +561,7 @@ RepositoryContextSortingFactory.$inject = [
     'EventEmitter',
     'utils'
 ];
-function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig) {
+function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig, QueryBuilder) {
     function Repository(config) {
         if (config instanceof RepositoryConfig === false) {
             throw new Error('Invalid config');
@@ -506,6 +578,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         getContext: getContext,
         updateContext: updateContext,
         findOne: findOne,
+        findAll: findAll,
         save: save,
         remove: remove
     };
@@ -533,38 +606,45 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         delete this.contexts[name];
     }
     function updateContext(context) {
-        if (!this.dataProvider.canList(this.config.endpoint)) {
+        if (!this.dataProvider.canList(this.config.name)) {
             return $q.reject();
         }
-        var config = this.config, state = context.toJSON();
-        this.dataProvider.findAll(config.endpoint, state).then(function (data) {
+        var state = context.toJSON();
+        this.dataProvider.findAll(this.config.name, state).then(function (data) {
             context.setData(data);
         }).catch(function (error) {
             context.setError(error);
         });
     }
+    function findAll(queryBuilder) {
+        if (queryBuilder instanceof QueryBuilder === false || queryBuilder.getRepository() !== this.config.name) {
+            throw new Error('Invalid query builder');
+        }
+        var params = queryBuilder.toJSON();
+        return this.dataProvider.findAll(this.config.name, params);
+    }
     function findOne(id) {
-        if (!this.dataProvider.canGet(this.config.endpoint, id)) {
+        if (!this.dataProvider.canGet(this.config.name, id)) {
             return $q.reject();
         }
-        return this.dataProvider.findOne(this.config.endpoint, id);
+        return this.dataProvider.findOne(this.config.name, id);
     }
     function remove(entity) {
-        if (!this.dataProvider.canRemove(this.config.endpoint, entity)) {
+        if (!this.dataProvider.canRemove(this.config.name, entity)) {
             return $q.reject();
         }
         var service = this;
-        return service.dataProvider.remove(this.config.endpoint, entity).then(function (response) {
+        return service.dataProvider.remove(this.config.name, entity).then(function (response) {
             service.emit(service.REMOVE, entity);
             return response;
         });
     }
     function save(entity) {
-        if (!this.dataProvider.canSave(this.config.endpoint, entity)) {
+        if (!this.dataProvider.canSave(this.config.name, entity)) {
             return $q.reject();
         }
         var self = this;
-        return this.dataProvider.save(this.config.endpoint, entity).then(function (response) {
+        return this.dataProvider.save(this.config.name, entity).then(function (response) {
             self.emit(self.UPDATE, entity);
             return response;
         });
@@ -581,22 +661,29 @@ RepositoryFactory.$inject = [
     'EventEmitter',
     'utils',
     'RepositoryContext',
-    'RepositoryConfig'
+    'RepositoryConfig',
+    'QueryBuilder'
 ];
-function RepositoryConfigFactory(DataProviderInterface, utils) {
+function RepositoryConfigFactory($injector, DataProviderInterface, utils) {
     function RepositoryConfig(config) {
-        if (!config.endpoint) {
-            throw new Error('Invalid endpoint');
+        if (!config.name) {
+            throw new Error('Invalid resource name');
         }
-        if (config.dataProvider instanceof DataProviderInterface === false) {
+        var dataProvider = config.dataProvider, isInjected = typeof dataProvider === 'string';
+        if (isInjected) {
+            dataProvider = $injector.get(dataProvider);
+        }
+        if (dataProvider instanceof DataProviderInterface === false) {
             throw new Error('Invalid data provider');
         }
         utils.merge(this, config);
+        this.dataProvider = dataProvider;
     }
     return RepositoryConfig;
 }
 angular.module('repository').factory('RepositoryConfig', RepositoryConfigFactory);
 RepositoryConfigFactory.$inject = [
+    '$injector',
     'DataProviderInterface',
     'utils'
 ];

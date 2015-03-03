@@ -103,7 +103,7 @@ describe('Repository', function() {
 			DataProvider = DataProviderInterface.extend();
 
 			var config = new RepositoryConfig({
-				endpoint: '/resource',
+				name: 'resource',
 				dataProvider: new DataProvider()
 			});
 
@@ -126,7 +126,7 @@ describe('Repository', function() {
 				var promise = instance.findOne(id),
 					value;
 
-				expect(dataProvider.findOne).toHaveBeenCalledWith(instance.config.endpoint, id);
+				expect(dataProvider.findOne).toHaveBeenCalledWith(instance.config.name, id);
 
 				promise.then(function(e) {
 					value = e;
@@ -161,7 +161,7 @@ describe('Repository', function() {
 				instance.save(entity);
 				$rootScope.$digest();
 
-				expect(dataProvider.save).toHaveBeenCalledWith(instance.config.endpoint, entity);
+				expect(dataProvider.save).toHaveBeenCalledWith(instance.config.name, entity);
 			}));
 
 			it('should NOT save if the method is not allowed on dataProvider', function() {
@@ -188,7 +188,7 @@ describe('Repository', function() {
 				instance.remove(entityId);
 				$rootScope.$digest();
 
-				expect(dataProvider.remove).toHaveBeenCalledWith(instance.config.endpoint, entityId);
+				expect(dataProvider.remove).toHaveBeenCalledWith(instance.config.name, entityId);
 			}));
 
 			it('should NOT remove if the method is not allowed on dataProvider', function() {
@@ -200,6 +200,49 @@ describe('Repository', function() {
 
 				expect(dataProvider.canRemove).toHaveBeenCalled();
 				expect(dataProvider.remove).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('#findAll(QueryBuilder query)', function() {
+			it('should call the dataProvider with the query parameters and return a promise', inject(function($q, QueryBuilder) {
+				var dataProvider = instance.dataProvider;
+				var response = {
+					meta: {
+						count: 100,
+						itemsPerPage: 2,
+						currentPage: 1
+					},
+					data: [{}, {}]
+				};
+
+				var qb = QueryBuilder.create()
+					.from(instance.name)
+					.limit(2)
+					.skip(0);
+
+				spyOn(dataProvider, 'findAll').and.returnValue($q.when(response));
+
+				instance.findAll(qb);
+				var args = dataProvider.findAll.calls.argsFor(0);
+
+				expect(args[0]).toBe(qb.$$repository);
+
+				expect(args[1].pagination).toEqual({
+					count: 0,
+					currentPage: 1,
+					itemsPerPage: 2
+				});
+
+				expect(args[1].sorting.length).toBe(0);
+				expect(args[1].filters.length).toBe(0);
+			}));
+
+			it('should trow and error without a valid query builder', function() {
+				function invalidQueryBuilder() {
+					instance.findAll(new Date());
+				}
+
+				expect(invalidQueryBuilder).toThrow();
 			});
 		});
 
@@ -230,7 +273,7 @@ describe('Repository', function() {
 					$rootScope.$digest();
 
 					expect(instance.updateContext).toHaveBeenCalledWith(context);
-					expect(dataProvider.findAll).toHaveBeenCalledWith(instance.config.endpoint, contextState);
+					expect(dataProvider.findAll).toHaveBeenCalledWith(instance.config.name, contextState);
 					expect(context.data).toBe(response.data);
 
 					var paginationState = context.pagination().toJSON();
@@ -258,7 +301,7 @@ describe('Repository', function() {
 				$rootScope.$digest();
 
 				expect(instance.updateContext).toHaveBeenCalledWith(context);
-				expect(dataProvider.findAll).toHaveBeenCalledWith(instance.config.endpoint, contextState);
+				expect(dataProvider.findAll).toHaveBeenCalledWith(instance.config.name, contextState);
 				expect(context.error).toBe(response);
 			}));
 		});

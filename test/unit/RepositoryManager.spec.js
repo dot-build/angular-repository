@@ -43,18 +43,16 @@ describe('RepositoryManager', function() {
 			var repositoryNameInjectable = repositoryConfig.name + RepositoryManager.suffix;
 			repositoryConfig.autoRegister = false;
 
-			var repository = RepositoryManager.addRepository(repositoryConfig);
+			RepositoryManager.addRepository(repositoryConfig);
 			expect($injector.has(repositoryNameInjectable)).toBe(false);
 		}));
 
 		it('should NOT add a repository without a name', inject(function(RepositoryManager, RepositoryConfig) {
-			var config = new RepositoryConfig({
-				name: '',
-				endpoint: '/test',
-				dataProvider: new DummyProvider()
-			});
-
 			function addRepositoryWithoutName() {
+				var config = new RepositoryConfig({
+					name: '',
+					dataProvider: new DummyProvider()
+				});
 				RepositoryManager.addRepository(config);
 			}
 
@@ -92,6 +90,32 @@ describe('RepositoryManager', function() {
 		it('should return NULL if the repository does not exists', inject(function(RepositoryManager) {
 			var result = RepositoryManager.getRepository('foo');
 			expect(result).toBe(null);
+		}));
+	});
+
+	describe('#createQuery()', function() {
+		it('should create and return an instance of a QueryBuilder', inject(function(RepositoryManager, QueryBuilder) {
+			expect(RepositoryManager.createQuery() instanceof QueryBuilder).toBe(true);
+		}));
+	});
+
+	describe('#executeQuery(QueryBuilder query)', function() {
+		it('should execute a search in the right repository using a QueryBuilder', inject(function(RepositoryManager, QueryBuilder) {
+			var query = QueryBuilder.create();
+
+			function execEmptyQuery() {
+				RepositoryManager.executeQuery(query);
+			}
+
+			expect(execEmptyQuery).toThrow();
+
+			var registeredRepository = RepositoryManager.addRepository(repositoryConfig);
+			spyOn(registeredRepository, 'findAll');
+
+			query.from(repositoryConfig.name);
+			RepositoryManager.executeQuery(query);
+
+			expect(registeredRepository.findAll).toHaveBeenCalledWith(query);
 		}));
 	});
 });

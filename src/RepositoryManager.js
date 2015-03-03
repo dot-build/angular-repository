@@ -2,14 +2,16 @@
  * @provider RepositoryManager
  */
 function RepositoryManagerProvider($provide) {
-	function RepositoryManagerFactory(Repository, RepositoryConfig) {
+	function RepositoryManagerFactory(Repository, RepositoryConfig, QueryBuilder) {
 		var repositoryMap = {};
 
 		var repositoryManager = {
 			addRepository: addRepository,
 			hasRepository: hasRepository,
 			getRepository: getRepository,
-			suffix: 'Repository'
+			suffix: 'Repository',
+			createQuery: createQuery,
+			executeQuery: executeQuery
 		};
 
 		function addRepository(config, properties) {
@@ -18,10 +20,6 @@ function RepositoryManagerProvider($provide) {
 			}
 
 			var name = config.name;
-
-			if (!name) {
-				throw new Error('Invalid repository name');
-			}
 
 			if (repositoryMap.hasOwnProperty(name)) {
 				throw new Error('Repository ' + name + ' already registed');
@@ -55,8 +53,22 @@ function RepositoryManagerProvider($provide) {
 			return name in repositoryMap;
 		}
 
+		function createQuery() {
+			return new QueryBuilder();
+		}
+
+		function executeQuery(queryBuilder) {
+			var repository = queryBuilder.getRepository();
+
+			if (!this.hasRepository(repository)) {
+				throw new Error('Invalid repository');
+			}
+
+			return this.getRepository(repository).findAll(queryBuilder);
+		}
+
 		return repositoryManager;
 	}
 
-	this.$get = ['Repository', 'RepositoryConfig', RepositoryManagerFactory];
+	this.$get = ['Repository', 'RepositoryConfig', 'QueryBuilder', RepositoryManagerFactory];
 }

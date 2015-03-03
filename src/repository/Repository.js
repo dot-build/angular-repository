@@ -1,7 +1,7 @@
 /**
  * @factory Repository
  */
-function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig) {
+function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig, QueryBuilder) {
 
 	function Repository(config) {
 		if (config instanceof RepositoryConfig === false) {
@@ -22,6 +22,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		getContext: getContext,
 		updateContext: updateContext,
 		findOne: findOne,
+		findAll: findAll,
 		save: save,
 		remove: remove
 	};
@@ -62,48 +63,57 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function updateContext(context) {
-		if (!this.dataProvider.canList(this.config.endpoint)) {
+		if (!this.dataProvider.canList(this.config.name)) {
 			return $q.reject();
 		}
 
-		var config = this.config,
-			state = context.toJSON();
+		var state = context.toJSON();
 
-		this.dataProvider.findAll(config.endpoint, state).then(function(data) {
+		this.dataProvider.findAll(this.config.name, state).then(function(data) {
 			context.setData(data);
 		}).catch(function(error) {
 			context.setError(error);
 		});
 	}
 
+	function findAll(queryBuilder) {
+		if (queryBuilder instanceof QueryBuilder === false || queryBuilder.getRepository() !== this.config.name) {
+			throw new Error('Invalid query builder');
+		}
+
+		var params = queryBuilder.toJSON();
+
+		return this.dataProvider.findAll(this.config.name, params);
+	}
+
 	function findOne(id) {
-		if (!this.dataProvider.canGet(this.config.endpoint, id)) {
+		if (!this.dataProvider.canGet(this.config.name, id)) {
 			return $q.reject();
 		}
 
-		return this.dataProvider.findOne(this.config.endpoint, id);
+		return this.dataProvider.findOne(this.config.name, id);
 	}
 
 	function remove(entity) {
-		if (!this.dataProvider.canRemove(this.config.endpoint, entity)) {
+		if (!this.dataProvider.canRemove(this.config.name, entity)) {
 			return $q.reject();
 		}
 
 		var service = this;
 
-		return service.dataProvider.remove(this.config.endpoint, entity).then(function(response) {
+		return service.dataProvider.remove(this.config.name, entity).then(function(response) {
 			service.emit(service.REMOVE, entity);
 			return response;
 		});
 	}
 
 	function save(entity) {
-		if (!this.dataProvider.canSave(this.config.endpoint, entity)) {
+		if (!this.dataProvider.canSave(this.config.name, entity)) {
 			return $q.reject();
 		}
 
 		var self = this;
-		return this.dataProvider.save(this.config.endpoint, entity).then(function(response) {
+		return this.dataProvider.save(this.config.name, entity).then(function(response) {
 			self.emit(self.UPDATE, entity);
 			return response;
 		});

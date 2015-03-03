@@ -1,17 +1,25 @@
 /**
  * @factory RepositoryConfig
  */
-function RepositoryConfigFactory(DataProviderInterface, utils) {
+function RepositoryConfigFactory($injector, DataProviderInterface, utils) {
 	function RepositoryConfig(config) {
-		if (!config.endpoint) {
-			throw new Error('Invalid endpoint');
+		if (!config.name) {
+			throw new Error('Invalid resource name');
 		}
 
-		if (config.dataProvider instanceof DataProviderInterface === false) {
+		var dataProvider = config.dataProvider,
+			isInjected = typeof dataProvider === 'string';
+
+		if (isInjected) {
+			dataProvider = $injector.get(dataProvider);
+		}
+
+		if (dataProvider instanceof DataProviderInterface === false) {
 			throw new Error('Invalid data provider');
 		}
 
 		utils.merge(this, config);
+		this.dataProvider = dataProvider;
 	}
 
 	return RepositoryConfig;
