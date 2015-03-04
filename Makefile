@@ -20,8 +20,8 @@ watch:
 	./node_modules/gulp/bin/gulp.js default
 
 apidoc:
-	find ./test/unit -type f -name "*.spec.js" | xargs cat | grep describe | tee a.tmp;
-	cat a.tmp | sed s/\',\ function\(\)\ \{// | sed -r s/describe[\(]+[\']+[\#\:]+// | sed -r s/^describe[\(]+[\']+/\\n\\n\#\#\ / | tee API.md
-	rm a.tmp;
+	find ./test/unit -type f -name "*.spec.js" | xargs cat | grep describe | tee api.tmp;\
+	node apidoc.js;\
+	rm api.tmp;
 
 .PHONY: all tdd test watch integration apidoc

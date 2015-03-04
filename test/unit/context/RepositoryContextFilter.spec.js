@@ -6,7 +6,7 @@ describe('RepositoryContextFilter', function() {
 		instance = new RepositoryContextFilter();
 	}));
 
-	describe('filter operator constants', function() {
+	describe('@operators: LT, LTE, GT, GTE, IN, EQ, LK, ST, END', function() {
 		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositoryContextFilter) {
 			var whereToLook = [RepositoryContextFilter, instance, instance.operators],
 				constants = ['LT', 'LTE', 'GT', 'GTE', 'IN', 'EQ', 'LK', 'ST', 'END'],
@@ -20,13 +20,13 @@ describe('RepositoryContextFilter', function() {
 		}));
 	});
 
-	describe('#constructor', function() {
+	describe('#constructor()', function() {
 		it('should be a subclass of EventEmitter', inject(function(EventEmitter) {
 			expect(instance instanceof EventEmitter).toBe(true);
 		}));
 	});
 
-	describe('::create', function() {
+	describe('::create(Object[] filters)', function() {
 		it('should create an instance and add filters to it', inject(function(RepositoryContextFilter) {
 			var ageFilter = {
 				name: 'age',

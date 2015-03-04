@@ -22,7 +22,7 @@ describe('Repository', function() {
 			instance = new Repository(config);
 		}));
 
-		describe('::extend', function() {
+		describe('::extend(Object [prototype])', function() {
 			it('should be a static method to extend the repository class', inject(function(Repository, RepositoryConfig) {
 				expect(typeof Repository.extend).toBe('function');
 
@@ -201,6 +201,14 @@ describe('Repository', function() {
 				expect(dataProvider.canRemove).toHaveBeenCalled();
 				expect(dataProvider.remove).not.toHaveBeenCalled();
 			});
+		});
+
+		describe('#createQuery()', function() {
+			it('should create a instance of QueryBuilder bound to the repository', inject(function(QueryBuilder) {
+				var query = instance.createQuery();
+				expect(query instanceof QueryBuilder).toBe(true);
+				expect(query.$$repository).toBe(instance.config.name);
+			}));
 		});
 
 		describe('#findAll(QueryBuilder query)', function() {

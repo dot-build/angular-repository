@@ -93,12 +93,6 @@ describe('RepositoryManager', function() {
 		}));
 	});
 
-	describe('#createQuery()', function() {
-		it('should create and return an instance of a QueryBuilder', inject(function(RepositoryManager, QueryBuilder) {
-			expect(RepositoryManager.createQuery() instanceof QueryBuilder).toBe(true);
-		}));
-	});
-
 	describe('#executeQuery(QueryBuilder query)', function() {
 		it('should execute a search in the right repository using a QueryBuilder', inject(function(RepositoryManager, QueryBuilder) {
 			var query = QueryBuilder.create();

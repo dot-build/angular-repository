@@ -96,15 +96,14 @@ QueryBuilderFactory.$inject = [
     'RepositoryContextPagination'
 ];
 function RepositoryManagerProvider($provide) {
-    function RepositoryManagerFactory(Repository, RepositoryConfig, QueryBuilder) {
+    function RepositoryManagerFactory(Repository, RepositoryConfig) {
         var repositoryMap = {};
         var repositoryManager = {
             addRepository: addRepository,
             hasRepository: hasRepository,
             getRepository: getRepository,
-            suffix: 'Repository',
-            createQuery: createQuery,
-            executeQuery: executeQuery
+            executeQuery: executeQuery,
+            suffix: 'Repository'
         };
         function addRepository(config, properties) {
             if (!config || config instanceof RepositoryConfig === false) {
@@ -134,9 +133,6 @@ function RepositoryManagerProvider($provide) {
         }
         function hasRepository(name) {
             return name in repositoryMap;
-        }
-        function createQuery() {
-            return new QueryBuilder();
         }
         function executeQuery(queryBuilder) {
             var repository = queryBuilder.getRepository();
@@ -577,8 +573,9 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         removeContext: removeContext,
         getContext: getContext,
         updateContext: updateContext,
-        findOne: findOne,
+        createQuery: createQuery,
         findAll: findAll,
+        findOne: findOne,
         save: save,
         remove: remove
     };
@@ -615,6 +612,9 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         }).catch(function (error) {
             context.setError(error);
         });
+    }
+    function createQuery() {
+        return QueryBuilder.create().from(this.config.name);
     }
     function findAll(queryBuilder) {
         if (queryBuilder instanceof QueryBuilder === false || queryBuilder.getRepository() !== this.config.name) {

@@ -1,20 +1,6 @@
-describe('ProductListController', function() {
+describe('ProductRepository: use a RepositoryContext inside a controller', function() {
 	beforeEach(module('integration'));
 	beforeEach(loadJSONFixture('product/list.json'));
-
-	function parseQueryString(string) {
-		var pairs = string.split('&'),
-			result = {};
-
-		pairs.forEach(function(pair) {
-			var name = pair.slice(0, pair.indexOf('=')),
-				value = pair.slice(name.length + 1);
-
-			result[name] = decodeURIComponent(value);
-		});
-
-		return result;
-	}
 
 	describe('fetch a list of products', function() {
 		var fixture, matcher;
@@ -65,22 +51,6 @@ describe('ProductListController', function() {
 			expect(pagination.currentPage).toBe(1);
 			expect(pagination.itemsPerPage).toBe(10);
 			expect(pagination.count).toBe(fixture.length);
-		}));
-
-		it('should fetch a list of products with a querybuilder', inject(function(RepositoryManager, $httpBackend) {
-			var qb = RepositoryManager.createQuery();
-
-			var onSuccess = jasmine.createSpy('success'),
-				onError = jasmine.createSpy('error');
-
-			qb.from('Product').where('name', 'product');
-
-			RepositoryManager.executeQuery(qb).then(onSuccess, onError);
-			$httpBackend.flush();
-
-			// data was put in the right place
-			expect(onSuccess).toHaveBeenCalled();
-			expect(onError).not.toHaveBeenCalled();
 		}));
 	});
 });

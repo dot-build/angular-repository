@@ -21,8 +21,9 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		removeContext: removeContext,
 		getContext: getContext,
 		updateContext: updateContext,
-		findOne: findOne,
+		createQuery: createQuery,
 		findAll: findAll,
+		findOne: findOne,
 		save: save,
 		remove: remove
 	};
@@ -74,6 +75,10 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		}).catch(function(error) {
 			context.setError(error);
 		});
+	}
+
+	function createQuery() {
+		return QueryBuilder.create().from(this.config.name);
 	}
 
 	function findAll(queryBuilder) {

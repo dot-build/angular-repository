@@ -1,0 +1,13 @@
+{
+	"meta": {
+		"currentPage": 1,
+		"itemsPerPage": 10
+	},
+	"data": [{
+		"name": "Some product",
+		"description": "This is just a random product"
+	}, {
+		"name": "Other product",
+		"description": "And another product it is"
+	}]
+}

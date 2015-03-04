@@ -6,7 +6,7 @@ describe('RepositoryContextSorting', function() {
 		instance = new RepositoryContextSorting();
 	}));
 
-	describe('sorting direction constants', function() {
+	describe('@directions: ASC DESC', function() {
 		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositoryContextSorting) {
 			expect(RepositoryContextSorting.ASC).toBe('asc');
 			expect(RepositoryContextSorting.DESC).toBe('desc');

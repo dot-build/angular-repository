@@ -2,16 +2,15 @@
  * @provider RepositoryManager
  */
 function RepositoryManagerProvider($provide) {
-	function RepositoryManagerFactory(Repository, RepositoryConfig, QueryBuilder) {
+	function RepositoryManagerFactory(Repository, RepositoryConfig) {
 		var repositoryMap = {};
 
 		var repositoryManager = {
 			addRepository: addRepository,
 			hasRepository: hasRepository,
 			getRepository: getRepository,
-			suffix: 'Repository',
-			createQuery: createQuery,
-			executeQuery: executeQuery
+			executeQuery: executeQuery,
+			suffix: 'Repository'
 		};
 
 		function addRepository(config, properties) {
@@ -51,10 +50,6 @@ function RepositoryManagerProvider($provide) {
 
 		function hasRepository(name) {
 			return name in repositoryMap;
-		}
-
-		function createQuery() {
-			return new QueryBuilder();
 		}
 
 		function executeQuery(queryBuilder) {
