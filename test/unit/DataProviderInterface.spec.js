@@ -37,25 +37,25 @@ describe('DataProviderInterface', function() {
 		}));
 	});
 
-	describe('#canGet(endpoint, id)', function() {
+	describe('#canGet(resource, id)', function() {
 		it('should return true as the default response', function() {
 			expect(instance.canGet()).toBe(true);
 		});
 	});
 
-	describe('#canList(endpoint, id)', function() {
+	describe('#canList(resource, id)', function() {
 		it('should return true as the default response', function() {
 			expect(instance.canList()).toBe(true);
 		});
 	});
 
-	describe('#canSave(endpoint, entity)', function() {
+	describe('#canSave(resource, entity)', function() {
 		it('should return true as the default response', function() {
 			expect(instance.canSave()).toBe(true);
 		});
 	});
 
-	describe('canRemove(endpoint, id)', function() {
+	describe('#canRemove(resource, id)', function() {
 		it('should return true as the default response', function() {
 			expect(instance.canRemove()).toBe(true);
 		});

@@ -52,7 +52,7 @@ var vendorFiles = [
 ];
 
 var fixtures = {
-	pattern: '**/test/fixtures/**/*.json',
+	pattern: 'test/fixtures/**/*.json',
 	watched: true,
 	served: true,
 	included: false

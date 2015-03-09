@@ -2,8 +2,8 @@
   "name": "angular-repository",
   "description": "",
   "version": "0.4.0",
-  "dependencies": {},
   "devDependencies": {
+    "angular-di-annotations": "^0.2.0",
     "gulp": "~3.8.0",
     "gulp-concat": "~2.2.0",
     "gulp-rename": "^1.2.0",
@@ -12,6 +12,7 @@
     "karma": "~0.12.16",
     "karma-coverage": "^0.2.4",
     "karma-jasmine": "^0.2.2",
+    "karma-ngannotations-preprocessor": "^0.1.1",
     "karma-phantomjs-launcher": "^0.1.4",
     "multipipe": "^0.1.1"
   }

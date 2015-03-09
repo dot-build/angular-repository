@@ -10,7 +10,7 @@ module.exports = function(config) {
 		captureTimeout: 60000,
 
 		exclude: [],
-		// urlRoot: '/__karma__/',
+
 		browsers: ['PhantomJS'],
 		frameworks: ['jasmine'],
 		port: 9800,
