@@ -1,14 +1,14 @@
 /**
- * @factory RepositoryContextFilter
+ * @factory RepositoryFilter
  */
-function RepositoryContextFilterFactory(EventEmitter, utils) {
-	function RepositoryContextFilter() {
+function RepositoryFilterFactory(EventEmitter, utils) {
+	function RepositoryFilter() {
 		EventEmitter.call(this);
 		this.$$filters = [];
 	}
 
-	RepositoryContextFilter.create = function(filters) {
-		var instance = new RepositoryContextFilter();
+	RepositoryFilter.create = function(filters) {
+		var instance = new RepositoryFilter();
 		instance.import(filters);
 
 		return instance;
@@ -43,7 +43,7 @@ function RepositoryContextFilterFactory(EventEmitter, utils) {
 	};
 
 	utils.merge(prototype, operators);
-	utils.merge(RepositoryContextFilter, operators);
+	utils.merge(RepositoryFilter, operators);
 
 	function toJSON() {
 		return this.$$filters.slice();
@@ -112,7 +112,7 @@ function RepositoryContextFilterFactory(EventEmitter, utils) {
 		});
 	}
 
-	utils.inherits(RepositoryContextFilter, EventEmitter, prototype);
+	utils.inherits(RepositoryFilter, EventEmitter, prototype);
 
-	return RepositoryContextFilter;
+	return RepositoryFilter;
 }

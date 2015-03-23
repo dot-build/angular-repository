@@ -1,13 +1,13 @@
 /**
- * @factory RepositoryContextSorting
+ * @factory RepositorySorting
  */
-function RepositoryContextSortingFactory(EventEmitter, utils) {
-	function RepositoryContextSorting() {
+function RepositorySortingFactory(EventEmitter, utils) {
+	function RepositorySorting() {
 		this.$$sorting = [];
 	}
 
-	RepositoryContextSorting.create = function(sorting) {
-		var instance = new RepositoryContextSorting();
+	RepositorySorting.create = function(sorting) {
+		var instance = new RepositorySorting();
 		instance.import(sorting);
 
 		return instance;
@@ -33,7 +33,7 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
 	};
 
 	utils.merge(prototype, directions);
-	utils.merge(RepositoryContextSorting, directions);
+	utils.merge(RepositorySorting, directions);
 
 	function toJSON() {
 		return this.$$sorting.slice();
@@ -118,7 +118,7 @@ function RepositoryContextSortingFactory(EventEmitter, utils) {
 		sortingList.forEach(addSorting, this);
 	}
 
-	utils.inherits(RepositoryContextSorting, EventEmitter, prototype);
+	utils.inherits(RepositorySorting, EventEmitter, prototype);
 
-	return RepositoryContextSorting;
+	return RepositorySorting;
 }

@@ -30,15 +30,15 @@ describe('RepositoryContext', function() {
 		});
 
 		it('should accept default values for filtering, sorting and pagination',
-			inject(function(RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination, RepositoryContext) {
+			inject(function(RepositoryFilter, RepositorySorting, RepositoryPagination, RepositoryContext) {
 				var context = new RepositoryContext();
 				var filters = [
-					['name', RepositoryContextFilter.EQ, 'John'],
-					['age', RepositoryContextFilter.GT, 21]
+					['name', RepositoryFilter.EQ, 'John'],
+					['age', RepositoryFilter.GT, 21]
 				];
 
 				var sorting = [
-					['age', RepositoryContextSorting.DESC]
+					['age', RepositorySorting.DESC]
 				];
 
 				var pagination = {
@@ -46,15 +46,15 @@ describe('RepositoryContext', function() {
 					limit: 10
 				};
 
-				spyOn(RepositoryContextFilter, 'create').and.callThrough();
-				spyOn(RepositoryContextSorting, 'create').and.callThrough();
-				spyOn(RepositoryContextPagination, 'create').and.callThrough();
+				spyOn(RepositoryFilter, 'create').and.callThrough();
+				spyOn(RepositorySorting, 'create').and.callThrough();
+				spyOn(RepositoryPagination, 'create').and.callThrough();
 
 				context.initialize(filters, sorting, pagination);
 
-				expect(RepositoryContextFilter.create).toHaveBeenCalledWith(filters);
-				expect(RepositoryContextSorting.create).toHaveBeenCalledWith(sorting);
-				expect(RepositoryContextPagination.create).toHaveBeenCalledWith(pagination);
+				expect(RepositoryFilter.create).toHaveBeenCalledWith(filters);
+				expect(RepositorySorting.create).toHaveBeenCalledWith(sorting);
+				expect(RepositoryPagination.create).toHaveBeenCalledWith(pagination);
 			}));
 	});
 
@@ -70,18 +70,18 @@ describe('RepositoryContext', function() {
 	});
 
 	describe('#filters()', function() {
-		it('should give access to the Context Filter object', inject(function(RepositoryContextFilter) {
+		it('should give access to the Context Filter object', inject(function(RepositoryFilter) {
 			var filters = context.filters();
 			expect(filters).not.toBe(undefined);
-			expect(filters instanceof RepositoryContextFilter).toBe(true);
+			expect(filters instanceof RepositoryFilter).toBe(true);
 		}));
 	});
 
 	describe('#sorting()', function() {
-		it('should give access to the Context Sorting object', inject(function(RepositoryContextSorting) {
+		it('should give access to the Context Sorting object', inject(function(RepositorySorting) {
 			var sorting = context.sorting();
 			expect(sorting).not.toBe(undefined);
-			expect(sorting instanceof RepositoryContextSorting).toBe(true);
+			expect(sorting instanceof RepositorySorting).toBe(true);
 		}));
 
 		it('should trigger the update event if a sorting rule is applied', function() {
@@ -96,10 +96,10 @@ describe('RepositoryContext', function() {
 	});
 
 	describe('#pagination()', function() {
-		it('should give access to Context Pagination object', inject(function(RepositoryContextPagination) {
+		it('should give access to Context Pagination object', inject(function(RepositoryPagination) {
 			var pagination = context.pagination();
 			expect(pagination).not.toBe(undefined);
-			expect(pagination instanceof RepositoryContextPagination).toBe(true);
+			expect(pagination instanceof RepositoryPagination).toBe(true);
 		}));
 
 		it('should trigger the update event if the pagination changes', function() {
@@ -136,14 +136,14 @@ describe('RepositoryContext', function() {
 	});
 
 	describe('#toJSON()', function() {
-		it('should return an object literal with sorting, pagination and filtering state', inject(function(RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination, RepositoryContext) {
-			var filters = ['name', RepositoryContextFilter.EQ, 'Bob'];
+		it('should return an object literal with sorting, pagination and filtering state', inject(function(RepositoryFilter, RepositorySorting, RepositoryPagination, RepositoryContext) {
+			var filters = ['name', RepositoryFilter.EQ, 'Bob'];
 			var pagination = {
 				count: 20,
 				itemsPerPage: 10,
 				currentPage: 2
 			};
-			var sorting = ['name', RepositoryContextSorting.ASC];
+			var sorting = ['name', RepositorySorting.ASC];
 
 			var context = new RepositoryContext();
 			context.initialize([filters], [sorting], pagination);

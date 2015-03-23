@@ -1,33 +1,33 @@
-describe('RepositoryContextPagination', function() {
+describe('RepositoryPagination', function() {
 	var instance;
 
 	beforeEach(module('repository'));
 
-	beforeEach(inject(function(RepositoryContextPagination) {
-		instance = new RepositoryContextPagination();
+	beforeEach(inject(function(RepositoryPagination) {
+		instance = new RepositoryPagination();
 	}));
 
 	describe('::create', function() {
-		it('should create a RepositoryContextPagination instance and set the state', inject(function(RepositoryContextPagination) {
+		it('should create a RepositoryPagination instance and set the state', inject(function(RepositoryPagination) {
 			var paginationState = {
 				currentPage: 1,
 				itemsPerPage: 10,
 				count: 100
 			};
 
-			var instance = RepositoryContextPagination.create(paginationState);
+			var instance = RepositoryPagination.create(paginationState);
 
-			expect(instance instanceof RepositoryContextPagination).toBe(true);
+			expect(instance instanceof RepositoryPagination).toBe(true);
 			expect(instance.count).toBe(paginationState.count);
 			expect(instance.currentPage).toBe(paginationState.currentPage);
 			expect(instance.itemsPerPage).toBe(paginationState.itemsPerPage);
 		}));
 
-		it('should create a RepositoryContextPagination instance and set the DEFAULT state', inject(function(RepositoryContextPagination) {
-			var instance = RepositoryContextPagination.create();
-			var defaults = RepositoryContextPagination.defaults;
+		it('should create a RepositoryPagination instance and set the DEFAULT state', inject(function(RepositoryPagination) {
+			var instance = RepositoryPagination.create();
+			var defaults = RepositoryPagination.defaults;
 
-			expect(instance instanceof RepositoryContextPagination).toBe(true);
+			expect(instance instanceof RepositoryPagination).toBe(true);
 			expect(instance.count).toBe(0);
 			expect(instance.currentPage).toBe(defaults.currentPage);
 			expect(instance.itemsPerPage).toBe(defaults.itemsPerPage);
@@ -272,8 +272,8 @@ describe('RepositoryContextPagination', function() {
 	});
 
 	describe('#reset()', function() {
-		it('should restore the default pagination state from RepositoryContextPagination.defaults', inject(function(RepositoryContextPagination) {
-			var defaultState = RepositoryContextPagination.defaults;
+		it('should restore the default pagination state from RepositoryPagination.defaults', inject(function(RepositoryPagination) {
+			var defaultState = RepositoryPagination.defaults;
 
 			var newState = {
 				currentPage: 2,

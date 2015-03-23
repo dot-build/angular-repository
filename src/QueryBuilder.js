@@ -1,11 +1,11 @@
 /**
  * @factory QueryBuilder
  */
-function QueryBuilderFactory(RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination) {
+function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagination) {
 	function QueryBuilder() {
-		this.$$filters = RepositoryContextFilter.create();
-		this.$$sorting = RepositoryContextSorting.create();
-		this.$$page = RepositoryContextPagination.create();
+		this.$$filters = RepositoryFilter.create();
+		this.$$sorting = RepositorySorting.create();
+		this.$$page = RepositoryPagination.create();
 		this.$$repository = '';
 	}
 
@@ -40,6 +40,11 @@ function QueryBuilderFactory(RepositoryContextFilter, RepositoryContextSorting, 
 		return this;
 	}
 
+	function page(page, limit) {
+		this.$$page.goToPage(page, limit);
+		return this;
+	}
+
 	function toJSON() {
 		return {
 			filters: this.$$filters.toJSON(),
@@ -60,14 +65,15 @@ function QueryBuilderFactory(RepositoryContextFilter, RepositoryContextSorting, 
 		sort: sort,
 		skip: skip,
 		limit: limit,
+		page: page,
 		toJSON: toJSON
 	};
 
 	QueryBuilder.prototype = prototype;
 	QueryBuilder.create = create;
 
-	QueryBuilder.operator = prototype.operator = RepositoryContextFilter.prototype.operators;
-	QueryBuilder.direction = prototype.direction = RepositoryContextSorting.prototype.directions;
+	QueryBuilder.operator = prototype.operator = RepositoryFilter.prototype.operators;
+	QueryBuilder.direction = prototype.direction = RepositorySorting.prototype.directions;
 
 	return QueryBuilder;
 }

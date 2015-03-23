@@ -1,14 +1,14 @@
-describe('RepositoryContextFilter', function() {
+describe('RepositoryFilter', function() {
 	var instance;
 
 	beforeEach(module('repository'));
-	beforeEach(inject(function(RepositoryContextFilter) {
-		instance = new RepositoryContextFilter();
+	beforeEach(inject(function(RepositoryFilter) {
+		instance = new RepositoryFilter();
 	}));
 
 	describe('@operators: LT, LTE, GT, GTE, IN, EQ, LK, ST, END', function() {
-		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositoryContextFilter) {
-			var whereToLook = [RepositoryContextFilter, instance, instance.operators],
+		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositoryFilter) {
+			var whereToLook = [RepositoryFilter, instance, instance.operators],
 				constants = ['LT', 'LTE', 'GT', 'GTE', 'IN', 'EQ', 'LK', 'ST', 'END'],
 				values = ['<', '<=', '>', '>=', 'in', '=', '~', '^', '$'];
 
@@ -27,14 +27,14 @@ describe('RepositoryContextFilter', function() {
 	});
 
 	describe('::create(Object[] filters)', function() {
-		it('should create an instance and add filters to it', inject(function(RepositoryContextFilter) {
+		it('should create an instance and add filters to it', inject(function(RepositoryFilter) {
 			var ageFilter = {
 				name: 'age',
 				value: 20,
-				operator: RepositoryContextFilter.GTE
+				operator: RepositoryFilter.GTE
 			};
 
-			var filters = RepositoryContextFilter.create([ageFilter]);
+			var filters = RepositoryFilter.create([ageFilter]);
 
 			expect(filters.toJSON()).toEqual([ageFilter]);
 		}));
@@ -69,7 +69,7 @@ describe('RepositoryContextFilter', function() {
 			expect(instance.$$filters.length).toBe(0);
 		});
 
-		it('should add filters using object notation', inject(function(RepositoryContextFilter) {
+		it('should add filters using object notation', inject(function(RepositoryFilter) {
 			var ageFilter = {
 				name: 'age',
 				operator: instance.LTE,

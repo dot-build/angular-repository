@@ -1,15 +1,15 @@
-describe('RepositoryContextSorting', function() {
+describe('RepositorySorting', function() {
 	var instance;
 
 	beforeEach(module('repository'));
-	beforeEach(inject(function(RepositoryContextSorting) {
-		instance = new RepositoryContextSorting();
+	beforeEach(inject(function(RepositorySorting) {
+		instance = new RepositorySorting();
 	}));
 
 	describe('@directions: ASC DESC', function() {
-		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositoryContextSorting) {
-			expect(RepositoryContextSorting.ASC).toBe('asc');
-			expect(RepositoryContextSorting.DESC).toBe('desc');
+		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositorySorting) {
+			expect(RepositorySorting.ASC).toBe('asc');
+			expect(RepositorySorting.DESC).toBe('desc');
 
 			expect(instance.ASC).toBe('asc');
 			expect(instance.DESC).toBe('desc');
@@ -26,13 +26,13 @@ describe('RepositoryContextSorting', function() {
 	});
 
 	describe('::create', function() {
-		it('should create an instance and add sorting to it', inject(function(RepositoryContextSorting) {
+		it('should create an instance and add sorting to it', inject(function(RepositorySorting) {
 			var ageSorting = {
 				name: 'age',
-				direction: RepositoryContextSorting.ASC
+				direction: RepositorySorting.ASC
 			};
 
-			var sorting = RepositoryContextSorting.create([ageSorting]);
+			var sorting = RepositorySorting.create([ageSorting]);
 
 			expect(sorting.toJSON()).toEqual([ageSorting]);
 		}));

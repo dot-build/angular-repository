@@ -1,22 +1,22 @@
 /**
- * @factory RepositoryContextPagination
+ * @factory RepositoryPagination
  */
-function RepositoryContextPaginationFactory(utils, EventEmitter) {
+function RepositoryPaginationFactory(utils, EventEmitter) {
 	var paginationDefaults = {
 		count: 0,
 		currentPage: 1,
 		itemsPerPage: 10
 	};
 
-	function RepositoryContextPagination() {
+	function RepositoryPagination() {
 		EventEmitter.call(this);
 		this.reset();
 	}
 
-	RepositoryContextPagination.defaults = paginationDefaults;
+	RepositoryPagination.defaults = paginationDefaults;
 
-	RepositoryContextPagination.create = function(state) {
-		var instance = new RepositoryContextPagination();
+	RepositoryPagination.create = function(state) {
+		var instance = new RepositoryPagination();
 
 		if (state) {
 			instance.setState(state);
@@ -27,7 +27,7 @@ function RepositoryContextPaginationFactory(utils, EventEmitter) {
 
 	var prototype = {
 		reset: function() {
-			utils.merge(this, RepositoryContextPagination.defaults);
+			utils.merge(this, RepositoryPagination.defaults);
 			this.pageCount = 0;
 		},
 
@@ -114,7 +114,7 @@ function RepositoryContextPaginationFactory(utils, EventEmitter) {
 		return true;
 	}
 
-	utils.inherits(RepositoryContextPagination, EventEmitter, prototype);
+	utils.inherits(RepositoryPagination, EventEmitter, prototype);
 
-	return RepositoryContextPagination;
+	return RepositoryPagination;
 }

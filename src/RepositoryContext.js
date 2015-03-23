@@ -1,7 +1,7 @@
 /**
  * @factory RepositoryContext
  */
-function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, RepositoryContextSorting, RepositoryContextPagination) {
+function RepositoryContextFactory(EventEmitter, utils, RepositoryFilter, RepositorySorting, RepositoryPagination) {
 	function RepositoryContext(name) {
 		this.name = name;
 		EventEmitter.call(this);
@@ -10,9 +10,9 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryContextFilter, 
 	function initialize(filters, sorting, pagination) {
 		var boundUpdateFn = update.bind(this);
 
-		this.$$filters = RepositoryContextFilter.create(filters);
-		this.$$sorting = RepositoryContextSorting.create(sorting);
-		this.$$pagination = RepositoryContextPagination.create(pagination);
+		this.$$filters = RepositoryFilter.create(filters);
+		this.$$sorting = RepositorySorting.create(sorting);
+		this.$$pagination = RepositoryPagination.create(pagination);
 
 		this.$$filters.on('update', boundUpdateFn);
 		this.$$sorting.on('update', boundUpdateFn);

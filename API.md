@@ -31,7 +31,7 @@
 	updateContext(RepositoryContext context)
 
 
-## RepositoryContextFilter
+## RepositoryFilter
 
 	operators: LT, LTE, GT, GTE, IN, EQ, LK, ST, END
 	constructor()
@@ -45,7 +45,7 @@
 	toArray()
 
 
-## RepositoryContextSorting
+## RepositorySorting
 
 	directions: ASC DESC
 	constructor
@@ -61,7 +61,7 @@
 	hasSorting(String name)
 
 
-## RepositoryContextPagination
+## RepositoryPagination
 
 	create
 	constructor
