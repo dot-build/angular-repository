@@ -25,6 +25,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		findAll: findAll,
 		findOne: findOne,
 		save: save,
+		saveAll: saveAll,
 		remove: remove
 	};
 
@@ -105,6 +106,29 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 
 		return this.dataProvider.save(this.config.name, entity).then(function(response) {
 			self.emit(self.UPDATE, entity);
+			return response;
+		});
+	}
+
+	var InvalidEntitySetError = new Error('InvalidEntitySetError');
+
+	function saveAll(entitySet) {
+		var self = this;
+
+		if (!Array.isArray(entitySet) || entitySet.length === 0) {
+			return $q.reject(InvalidEntitySetError);
+		}
+
+		var validSet = entitySet.every(function(entity) {
+			return entity !== null && typeof entity === 'object';
+		});
+
+		if (!validSet) {
+			return $q.reject(InvalidEntitySetError);
+		}
+
+		return this.dataProvider.saveAll(this.config.name, entitySet).then(function(response) {
+			self.emit(self.UPDATE, entitySet);
 			return response;
 		});
 	}

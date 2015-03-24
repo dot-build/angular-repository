@@ -135,6 +135,54 @@ describe('Repository', function() {
 		}));
 	});
 
+	describe('#saveAll(Object[] entities)', function() {
+		it('should only allow an array of objects as a valid entity set', inject(function($q, $rootScope) {
+			var invalidSets = {
+				empty: [],
+				nullValues: [null, {}],
+				numbers: [1, 2, 3],
+				strings: ['one', 'two'],
+				undefinedValues: [undefined]
+			};
+
+			var dataProvider = instance.config.dataProvider;
+			spyOn(dataProvider, 'saveAll').and.callFake(function() {
+				return $q.when(true);
+			});
+
+			Object.keys(invalidSets).forEach(function(key) {
+				var invalidSet = invalidSets[key],
+					onError = jasmine.createSpy('error-' + key);
+
+				instance.saveAll(invalidSet).then(null, onError);
+				$rootScope.$digest();
+
+				expect(onError).toHaveBeenCalled();
+			});
+
+			expect(dataProvider.saveAll).not.toHaveBeenCalled();
+		}));
+
+		it('should persist a set of entities in batch mode', inject(function($q, $rootScope) {
+			var config = instance.config,
+				dataProvider = config.dataProvider,
+				entitySet = [{
+					id: 1,
+					name: 'John'
+				}, {
+					id: 2,
+					name: 'Paul'
+				}];
+
+			spyOn(dataProvider, 'saveAll').and.returnValue($q.when(true));
+			instance.saveAll(entitySet);
+
+			$rootScope.$digest();
+
+			expect(dataProvider.saveAll).toHaveBeenCalledWith(instance.config.name, entitySet);
+		}));
+	});
+
 	describe('#remove(String id)', function() {
 		it('should remove a single entity found by ID', inject(function($q, $rootScope) {
 			var config = instance.config,
