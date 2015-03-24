@@ -15,8 +15,15 @@ describe('ProductRepository: use a RepositoryContext inside a controller', funct
 
 				if (match) {
 					var params = parseQueryString(match[1]);
-					meta.currentPage = +params.page;
-					meta.itemsPerPage = +params.limit;
+
+					if (params.page) {
+						meta.currentPage = +params.page;
+					}
+
+					if (params.limit) {
+						meta.itemsPerPage = +params.limit;
+					}
+
 					meta.count = fixture.length;
 				}
 
@@ -49,7 +56,9 @@ describe('ProductRepository: use a RepositoryContext inside a controller', funct
 
 			// pagination kept the right state after update
 			expect(pagination.currentPage).toBe(1);
-			expect(pagination.itemsPerPage).toBe(10);
+
+			// no limit was set
+			expect(pagination.itemsPerPage).toBe(0);
 			expect(pagination.count).toBe(fixture.length);
 		}));
 	});

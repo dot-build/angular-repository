@@ -3,7 +3,7 @@
 ## DataProviderInterface
 
 	:: extend(Object prototype)
-	@ findOne(), findAll(), remove(), removeAll(), save(), saveAll() - abstract methods
+	@ find(), findAll(), remove(), removeAll(), save(), saveAll() - abstract methods
 
 
 ## RepositoryConfig
@@ -18,7 +18,7 @@
 	# createContext(String name)
 	# getContext(String name)
 	# removeContext(String name)
-	# findOne(String id)
+	# find(String id)
 	# save(Object entity)
 	# saveAll(Object[] entities)
 	# remove(String id)

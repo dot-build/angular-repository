@@ -4,7 +4,7 @@ all:
 tdd:
 	./node_modules/gulp/bin/gulp.js tdd
 
-integration:
+test-integration:
 	./node_modules/gulp/bin/gulp.js integration
 
 integration-tdd:

@@ -25,7 +25,7 @@ Each method has the responsibility of do server calls and return a `Promise`. Th
 
 `Repository` is the actual top-level API consumable by other parts of the app. It has the following methods:
 
-* findOne(endpoint, id)
+* find(endpoint, id)
 * findAll(query)
 * save(endpoint, entity)
 * saveAll(endpoint, entities)
@@ -97,7 +97,7 @@ function ProductListController(ProductRepository) {
 // assuming there's a $stateParams object with the productId to edit
 function ProductEditController(ProductRepository, $stateParams) {
 	var editor = this;
-	ProductRepository.findOne(productId).then(function(product){
+	ProductRepository.find(productId).then(function(product){
 		editor.product = product;
 	});
 

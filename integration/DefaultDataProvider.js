@@ -32,7 +32,7 @@ angular.module('integration').factory('DefaultDataProvider', function(DataProvid
 	var DefaultDataProvider = DataProviderInterface.extend({
 		baseUrl: '/api',
 
-		findOne: function(resource, id) {
+		find: function(resource, id) {
 			return $http.get(this.baseUrl + resource + '/' + id);
 		},
 
