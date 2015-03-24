@@ -85,6 +85,7 @@
 	# limit(Number limit)
 	# skip(Number skip)
 	# page(Number page, Number [limit])
+	# reset()
 	# toJSON()
 
 
