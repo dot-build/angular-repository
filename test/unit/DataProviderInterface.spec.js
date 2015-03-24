@@ -14,12 +14,14 @@ describe('DataProviderInterface', function() {
 		}));
 	});
 
-	describe('@findOne(), findAll(), remove(), save() - abstract methods', function() {
+	describe('@findOne(), findAll(), remove(), removeAll(), save(), saveAll() - abstract methods', function() {
 		it('should throw exceptions if a method not implemented is called', inject(function($rootScope) {
 			checkPromise(instance.findOne);
 			checkPromise(instance.findAll);
 			checkPromise(instance.remove);
+			checkPromise(instance.removeAll);
 			checkPromise(instance.save);
+			checkPromise(instance.saveAll);
 
 			function checkPromise(fn) {
 				var promise = fn();
@@ -35,30 +37,6 @@ describe('DataProviderInterface', function() {
 				expect(error instanceof Error).toBe(true);
 			}
 		}));
-	});
-
-	describe('#canGet(resource, id)', function() {
-		it('should return true as the default response', function() {
-			expect(instance.canGet()).toBe(true);
-		});
-	});
-
-	describe('#canList(resource, id)', function() {
-		it('should return true as the default response', function() {
-			expect(instance.canList()).toBe(true);
-		});
-	});
-
-	describe('#canSave(resource, entity)', function() {
-		it('should return true as the default response', function() {
-			expect(instance.canSave()).toBe(true);
-		});
-	});
-
-	describe('#canRemove(resource, id)', function() {
-		it('should return true as the default response', function() {
-			expect(instance.canRemove()).toBe(true);
-		});
 	});
 
 });

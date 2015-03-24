@@ -90,9 +90,7 @@ describe('Repository', function() {
 			expect(context).toBe(null);
 		}));
 	});
-	// });
 
-	// --- ///
 	describe('#findOne(String id)', function() {
 		it('should retrieve a single entity with the given id through DataProvider#findOne', inject(function(RepositoryConfig, $q, $rootScope) {
 			var config = instance.config,
@@ -118,17 +116,6 @@ describe('Repository', function() {
 			$rootScope.$digest();
 			expect(value).toEqual(entity);
 		}));
-
-		it('should NOT search if the method is not allowed on dataProvider', function() {
-			var dataProvider = instance.config.dataProvider;
-			spyOn(dataProvider, 'canGet').and.returnValue(false);
-			spyOn(dataProvider, 'findOne');
-
-			instance.findOne('id');
-
-			expect(dataProvider.canGet).toHaveBeenCalled();
-			expect(dataProvider.findOne).not.toHaveBeenCalled();
-		});
 	});
 
 	describe('#save(Object entity)', function() {
@@ -146,19 +133,6 @@ describe('Repository', function() {
 
 			expect(dataProvider.save).toHaveBeenCalledWith(instance.config.name, entity);
 		}));
-
-		it('should NOT save if the method is not allowed on dataProvider', function() {
-			var dataProvider = instance.config.dataProvider;
-			spyOn(dataProvider, 'canSave').and.returnValue(false);
-			spyOn(dataProvider, 'save');
-
-			instance.save({
-				id: '1'
-			});
-
-			expect(dataProvider.canSave).toHaveBeenCalled();
-			expect(dataProvider.save).not.toHaveBeenCalled();
-		});
 	});
 
 	describe('#remove(String id)', function() {
@@ -173,17 +147,6 @@ describe('Repository', function() {
 
 			expect(dataProvider.remove).toHaveBeenCalledWith(instance.config.name, entityId);
 		}));
-
-		it('should NOT remove if the method is not allowed on dataProvider', function() {
-			var dataProvider = instance.config.dataProvider;
-			spyOn(dataProvider, 'canRemove').and.returnValue(false);
-			spyOn(dataProvider, 'remove');
-
-			instance.remove('id');
-
-			expect(dataProvider.canRemove).toHaveBeenCalled();
-			expect(dataProvider.remove).not.toHaveBeenCalled();
-		});
 	});
 
 	describe('#createQuery()', function() {

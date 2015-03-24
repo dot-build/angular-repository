@@ -10,12 +10,9 @@ function DataProviderInterfaceFactory(utils, $q) {
 		findOne: notImplemented('findOne'),
 		findAll: notImplemented('findAll'),
 		remove: notImplemented('remove'),
+		removeAll: notImplemented('removeAll'),
 		save: notImplemented('save'),
-
-		canGet: canDoMethod,
-		canSave: canDoMethod,
-		canRemove: canDoMethod,
-		canList: canDoMethod
+		saveAll: notImplemented('saveAll')
 	};
 
 	function extend(prototype) {
@@ -26,10 +23,6 @@ function DataProviderInterfaceFactory(utils, $q) {
 		return function() {
 			return $q.reject(new Error(method + '() is not implemented'));
 		};
-	}
-
-	function canDoMethod() {
-		return true;
 	}
 
 	return DataProviderInterface;

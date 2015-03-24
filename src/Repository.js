@@ -64,10 +64,6 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function updateContext(context) {
-		if (!this.dataProvider.canList(this.config.name)) {
-			return $q.reject();
-		}
-
 		var state = context.toJSON();
 
 		this.dataProvider.findAll(this.config.name, state).then(function(data) {
@@ -92,18 +88,10 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function findOne(id) {
-		if (!this.dataProvider.canGet(this.config.name, id)) {
-			return $q.reject();
-		}
-
 		return this.dataProvider.findOne(this.config.name, id);
 	}
 
 	function remove(entity) {
-		if (!this.dataProvider.canRemove(this.config.name, entity)) {
-			return $q.reject();
-		}
-
 		var service = this;
 
 		return service.dataProvider.remove(this.config.name, entity).then(function(response) {
@@ -113,11 +101,8 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function save(entity) {
-		if (!this.dataProvider.canSave(this.config.name, entity)) {
-			return $q.reject();
-		}
-
 		var self = this;
+
 		return this.dataProvider.save(this.config.name, entity).then(function(response) {
 			self.emit(self.UPDATE, entity);
 			return response;
