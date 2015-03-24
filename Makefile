@@ -24,4 +24,12 @@ apidoc:
 	node apidoc.js;\
 	rm api.tmp;
 
-.PHONY: all tdd test watch integration apidoc
+release: all
+	./node_modules/gulp/bin/gulp.js build;\
+	if [ $$? -gt 0 ]; then\
+		exit 1;\
+	fi;\
+	git add -A;\
+	git commit -m "chore: prepare for release";\
+
+.PHONY: all tdd test watch integration apidoc release
