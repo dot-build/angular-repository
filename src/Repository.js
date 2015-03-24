@@ -26,7 +26,8 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		findOne: findOne,
 		save: save,
 		saveAll: saveAll,
-		remove: remove
+		remove: remove,
+		removeAll: removeAll
 	};
 
 	var repositoryEvents = {
@@ -97,6 +98,15 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 
 		return service.dataProvider.remove(this.config.name, entity).then(function(response) {
 			service.emit(service.REMOVE, entity);
+			return response;
+		});
+	}
+
+	function removeAll(entityIds) {
+		var service = this;
+
+		return service.dataProvider.removeAll(this.config.name, entityIds).then(function(response) {
+			service.emit(service.REMOVE, entityIds);
 			return response;
 		});
 	}

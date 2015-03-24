@@ -197,6 +197,21 @@ describe('Repository', function() {
 		}));
 	});
 
+	describe('#removeAll(String[] id)', function() {
+		it('should remove a set of entities in batch mode', inject(function($q, $rootScope) {
+			var config = instance.config,
+				dataProvider = config.dataProvider,
+				entitySet = [1, 2, 3];
+
+			spyOn(dataProvider, 'removeAll').and.returnValue($q.when(true));
+
+			instance.removeAll(entitySet);
+			$rootScope.$digest();
+
+			expect(dataProvider.removeAll).toHaveBeenCalledWith(instance.config.name, entitySet);
+		}));
+	});
+
 	describe('#createQuery()', function() {
 		it('should create a instance of QueryBuilder bound to the repository', inject(function(QueryBuilder) {
 			var query = instance.createQuery();
