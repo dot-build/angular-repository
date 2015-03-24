@@ -25,12 +25,12 @@ Each method has the responsibility of do server calls and return a `Promise`. Th
 
 `Repository` is the actual top-level API consumable by other parts of the app. It has the following methods:
 
-* find(endpoint, id)
+* find(id)
 * findAll(query)
-* save(endpoint, entity)
-* saveAll(endpoint, entities)
-* remove(endpoint, id)
-* removeAll(endpoint, ids)
+* save(entity)
+* saveAll(entityArray)
+* remove(id)
+* removeAll(ids)
 
 It all starts with the `RepositoryManager`, where a `Repository` is registered.
 
@@ -85,7 +85,6 @@ function ProductListController(ProductRepository) {
 	// if this context was not created before, initialize it
 	if (!context) {
 		context = ProductRepository.createContext('product-list');
-		context.initialize();
 	}
 
 	// triggers a context update to get up-to-date data
