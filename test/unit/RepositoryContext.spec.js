@@ -10,25 +10,19 @@ describe('RepositoryContext', function() {
 
 	beforeEach(inject(function(RepositoryContext) {
 		context = new RepositoryContext(CONTEXT_NAME);
-		context.initialize();
 	}));
 
 	describe('#constructor(String name)', function() {
-		it('should be a subclass of EventEmitter and store the state name', inject(function(EventEmitter) {
+		it('should initialize the instance with default properties and a query builder', inject(function(EventEmitter, QueryBuilder) {
 			expect(context instanceof EventEmitter).toBe(true);
+			expect(context.query instanceof QueryBuilder).toBe(true);
 			expect(context.name).toBe(CONTEXT_NAME);
+			expect(context.data).toBe(null);
+			expect(context.error).toBe(null);
 		}));
 	});
 
 	describe('#initialize(Object filters, Object sorting, Object pagination)', function() {
-		it('should initialize the context with default values and objects', function() {
-			expect(context.$$filters).not.toBe(undefined);
-			expect(context.$$sorting).not.toBe(undefined);
-			expect(context.$$pagination).not.toBe(undefined);
-			expect(context.data).toBe(null);
-			expect(context.error).toBe(null);
-		});
-
 		it('should accept default values for filtering, sorting and pagination',
 			inject(function(RepositoryFilter, RepositorySorting, RepositoryPagination, RepositoryContext) {
 				var context = new RepositoryContext();
@@ -46,15 +40,15 @@ describe('RepositoryContext', function() {
 					limit: 10
 				};
 
-				spyOn(RepositoryFilter, 'create').and.callThrough();
-				spyOn(RepositorySorting, 'create').and.callThrough();
-				spyOn(RepositoryPagination, 'create').and.callThrough();
+				spyOn(context.query.$$filters, 'setState').and.callThrough();
+				spyOn(context.query.$$pagination, 'setState').and.callThrough();
+				spyOn(context.query.$$sorting, 'setState').and.callThrough();
 
 				context.initialize(filters, sorting, pagination);
 
-				expect(RepositoryFilter.create).toHaveBeenCalledWith(filters);
-				expect(RepositorySorting.create).toHaveBeenCalledWith(sorting);
-				expect(RepositoryPagination.create).toHaveBeenCalledWith(pagination);
+				expect(context.query.$$filters.setState).toHaveBeenCalledWith(filters);
+				expect(context.query.$$sorting.setState).toHaveBeenCalledWith(sorting);
+				expect(context.query.$$pagination.setState).toHaveBeenCalledWith(pagination);
 			}));
 	});
 
@@ -105,12 +99,6 @@ describe('RepositoryContext', function() {
 		it('should trigger the update event if the pagination changes', function() {
 			var spy = jasmine.createSpy();
 
-			var paginationState = {
-				count: 20,
-				itemsPerPage: 10,
-				currentPage: 1
-			};
-
 			context.on('update', spy);
 
 			var pagination = context.pagination();
@@ -123,15 +111,15 @@ describe('RepositoryContext', function() {
 
 	describe('#reset()', function() {
 		it('should reset all the stateful objects of context', function() {
-			spyOn(context.$$filters, 'reset');
-			spyOn(context.$$sorting, 'reset');
-			spyOn(context.$$pagination, 'reset');
+			spyOn(context.query.$$filters, 'reset');
+			spyOn(context.query.$$sorting, 'reset');
+			spyOn(context.query.$$pagination, 'reset');
 
 			context.reset();
 
-			expect(context.$$filters.reset).toHaveBeenCalled();
-			expect(context.$$sorting.reset).toHaveBeenCalled();
-			expect(context.$$pagination.reset).toHaveBeenCalled();
+			expect(context.query.$$filters.reset).toHaveBeenCalled();
+			expect(context.query.$$sorting.reset).toHaveBeenCalled();
+			expect(context.query.$$pagination.reset).toHaveBeenCalled();
 		});
 	});
 
@@ -227,7 +215,7 @@ describe('RepositoryContext', function() {
 
 			context.emit.calls.reset();
 
-			var response = context.setData(dto);
+			response = context.setData(dto);
 			expect(response).toBe(true);
 
 			expect(context.data).toBe(dto.data);

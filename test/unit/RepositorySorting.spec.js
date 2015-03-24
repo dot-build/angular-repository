@@ -40,15 +40,15 @@ describe('RepositorySorting', function() {
 
 	describe('#add(Array sorting)', function() {
 		it('should silently refuse to add invalid sorting values', function() {
-			instance.import({});
-			instance.import(null);
-			instance.import();
-			instance.import(0);
-			instance.import(false);
-			instance.import([]);
-			instance.import([null]);
-			instance.import([{}]);
-			instance.import([{
+			instance.setState({});
+			instance.setState(null);
+			instance.setState();
+			instance.setState(0);
+			instance.setState(false);
+			instance.setState([]);
+			instance.setState([null]);
+			instance.setState([{}]);
+			instance.setState([{
 				name: ''
 			}]);
 
@@ -61,7 +61,7 @@ describe('RepositorySorting', function() {
 				direction: instance.ASC
 			}];
 
-			instance.import(sorting);
+			instance.setState(sorting);
 
 			expect(instance.$$sorting.length).toBe(1);
 			expect(instance.$$sorting[0].name).toBe('name');
@@ -71,7 +71,7 @@ describe('RepositorySorting', function() {
 		it('should add sorting values from an array of ordered pairs with name and direction', function() {
 			var sorting = ['name', instance.DESC];
 
-			instance.import([sorting]);
+			instance.setState([sorting]);
 
 			expect(instance.$$sorting.length).toBe(1);
 			expect(instance.$$sorting[0].name).toBe('name');

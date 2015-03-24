@@ -52,31 +52,31 @@ describe('RepositoryFilter', function() {
 		});
 	});
 
-	describe('#import(Array filters)', function() {
+	describe('#setState(Array filters)', function() {
 		it('should silently refuse to add invalid values', function() {
-			instance.import(null);
-			instance.import({});
-			instance.import(0);
-			instance.import(undefined);
-			instance.import(arguments);
-			instance.import([]);
-			instance.import([{}]);
-			instance.import([null]);
+			instance.setState(null);
+			instance.setState({});
+			instance.setState(0);
+			instance.setState(undefined);
+			instance.setState(arguments);
+			instance.setState([]);
+			instance.setState([{}]);
+			instance.setState([null]);
 
 			// array but not an array of filters
-			instance.import(['name', instance.EQ, 'John']);
+			instance.setState(['name', instance.EQ, 'John']);
 
 			expect(instance.$$filters.length).toBe(0);
 		});
 
-		it('should add filters using object notation', inject(function(RepositoryFilter) {
+		it('should add filters using object notation', inject(function() {
 			var ageFilter = {
 				name: 'age',
 				operator: instance.LTE,
 				value: 32
 			};
 
-			instance.import([ageFilter]);
+			instance.setState([ageFilter]);
 
 			expect(instance.$$filters.length).toBe(1);
 			expect(instance.$$filters[0]).toEqual(ageFilter);
@@ -91,7 +91,7 @@ describe('RepositoryFilter', function() {
 
 			var filterAsArray = [ageFilter.name, ageFilter.operator, ageFilter.value];
 
-			instance.import([filterAsArray]);
+			instance.setState([filterAsArray]);
 
 			expect(instance.$$filters.length).toBe(1);
 			expect(instance.$$filters[0]).toEqual(ageFilter);

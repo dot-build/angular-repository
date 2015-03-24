@@ -8,7 +8,7 @@ function RepositorySortingFactory(EventEmitter, utils) {
 
 	RepositorySorting.create = function(sorting) {
 		var instance = new RepositorySorting();
-		instance.import(sorting);
+		instance.setState(sorting);
 
 		return instance;
 	};
@@ -19,7 +19,7 @@ function RepositorySortingFactory(EventEmitter, utils) {
 	};
 
 	var prototype = {
-		import: addSortingList,
+		setState: addSortingList,
 		sort: sort,
 		invert: invert,
 		remove: removeSorting,

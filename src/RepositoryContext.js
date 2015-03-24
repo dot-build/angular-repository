@@ -1,37 +1,42 @@
 /**
  * @factory RepositoryContext
  */
-function RepositoryContextFactory(EventEmitter, utils, RepositoryFilter, RepositorySorting, RepositoryPagination) {
+function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
 	function RepositoryContext(name) {
-		this.name = name;
 		EventEmitter.call(this);
+
+		var query = QueryBuilder.create(),
+			boundUpdateFn = update.bind(this);
+
+		this.name = name;
+		this.data = null;
+		this.error = null;
+		this.query = query;
+
+		// the QueryBuilder instance won't trigger itself the events, this is a context-only thing
+		query.$$filters.on('update', boundUpdateFn);
+		query.$$sorting.on('update', boundUpdateFn);
+		query.$$pagination.on('update', boundUpdateFn);
 	}
 
 	function initialize(filters, sorting, pagination) {
-		var boundUpdateFn = update.bind(this);
+		var query = this.query;
 
-		this.$$filters = RepositoryFilter.create(filters);
-		this.$$sorting = RepositorySorting.create(sorting);
-		this.$$pagination = RepositoryPagination.create(pagination);
-
-		this.$$filters.on('update', boundUpdateFn);
-		this.$$sorting.on('update', boundUpdateFn);
-		this.$$pagination.on('update', boundUpdateFn);
-
-		this.data = null;
-		this.error = null;
+		query.$$filters.setState(filters);
+		query.$$sorting.setState(sorting);
+		query.$$pagination.setState(pagination);
 	}
 
 	function filters() {
-		return this.$$filters;
+		return this.query.$$filters;
 	}
 
 	function sorting() {
-		return this.$$sorting;
+		return this.query.$$sorting;
 	}
 
 	function pagination() {
-		return this.$$pagination;
+		return this.query.$$pagination;
 	}
 
 	function update() {
@@ -47,7 +52,7 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryFilter, Reposit
 		var page = dataTransferObject.meta;
 
 		if (page) {
-			this.$$pagination.setState({
+			this.query.$$pagination.setState({
 				count: page.count || null,
 				currentPage: page.currentPage || null,
 				itemsPerPage: page.itemsPerPage || null
@@ -68,25 +73,21 @@ function RepositoryContextFactory(EventEmitter, utils, RepositoryFilter, Reposit
 	}
 
 	function reset() {
-		this.$$filters.reset();
-		this.$$sorting.reset();
-		this.$$pagination.reset();
+		this.query.$$filters.reset();
+		this.query.$$sorting.reset();
+		this.query.$$pagination.reset();
 	}
 
 	function toJSON() {
 		return {
-			filters: this.$$filters.toJSON(),
-			pagination: this.$$pagination.toJSON(),
-			sorting: this.$$sorting.toJSON()
+			filters: this.query.$$filters.toJSON(),
+			pagination: this.query.$$pagination.toJSON(),
+			sorting: this.query.$$sorting.toJSON()
 		};
 	}
 
 	var prototype = {
 		INVALID_RESPONSE: 'INVALID_RESPONSE',
-
-		$$filters: null,
-		$$pagination: null,
-		$$sorting: null,
 
 		initialize: initialize,
 		filters: filters,

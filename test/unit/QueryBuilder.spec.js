@@ -42,7 +42,7 @@ describe('QueryBuilder', function() {
 		it('should set the page size and return the instance', inject(function(QueryBuilder) {
 			var qb = new QueryBuilder();
 			qb.limit(4);
-			expect(qb.$$page.toJSON().itemsPerPage).toBe(4);
+			expect(qb.$$pagination.toJSON().itemsPerPage).toBe(4);
 		}));
 	});
 
@@ -50,7 +50,7 @@ describe('QueryBuilder', function() {
 		it('should set the search offset and return the instance', inject(function(QueryBuilder) {
 			var qb = new QueryBuilder();
 			qb.limit(5).skip(10);
-			expect(qb.$$page.toJSON().currentPage).toBe(3);
+			expect(qb.$$pagination.toJSON().currentPage).toBe(3);
 		}));
 	});
 
@@ -59,7 +59,7 @@ describe('QueryBuilder', function() {
 			var qb = new QueryBuilder();
 			qb.page(2, 10);
 
-			var params = qb.$$page.toJSON();
+			var params = qb.$$pagination.toJSON();
 			expect(params.currentPage).toBe(2);
 			expect(params.itemsPerPage).toBe(10);
 		}));

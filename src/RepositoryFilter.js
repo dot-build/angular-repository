@@ -9,7 +9,7 @@ function RepositoryFilterFactory(EventEmitter, utils) {
 
 	RepositoryFilter.create = function(filters) {
 		var instance = new RepositoryFilter();
-		instance.import(filters);
+		instance.setState(filters);
 
 		return instance;
 	};
@@ -27,11 +27,11 @@ function RepositoryFilterFactory(EventEmitter, utils) {
 	};
 
 	var operatorsArray = Object.keys(operators).map(function(key) {
-		return operators[key]
+		return operators[key];
 	});
 
 	var prototype = {
-		import: addFilterList,
+		setState: addFilterList,
 		toJSON: toJSON,
 		toArray: toArray,
 		where: where,

@@ -5,7 +5,7 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
 	function QueryBuilder() {
 		this.$$filters = RepositoryFilter.create();
 		this.$$sorting = RepositorySorting.create();
-		this.$$page = RepositoryPagination.create();
+		this.$$pagination = RepositoryPagination.create();
 		this.$$repository = '';
 	}
 
@@ -29,26 +29,26 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
 	}
 
 	function skip(skipValue) {
-		this.$$page.goToPage(~~(skipValue / this.$$page.itemsPerPage) + 1);
+		this.$$pagination.goToPage(~~(skipValue / this.$$pagination.itemsPerPage) + 1);
 		return this;
 	}
 
 	function limit(limitValue) {
-		this.$$page.setState({
+		this.$$pagination.setState({
 			itemsPerPage: limitValue
 		});
 		return this;
 	}
 
 	function page(page, limit) {
-		this.$$page.goToPage(page, limit);
+		this.$$pagination.goToPage(page, limit);
 		return this;
 	}
 
 	function toJSON() {
 		return {
 			filters: this.$$filters.toJSON(),
-			pagination: this.$$page.toJSON(),
+			pagination: this.$$pagination.toJSON(),
 			sorting: this.$$sorting.toJSON()
 		};
 	}
