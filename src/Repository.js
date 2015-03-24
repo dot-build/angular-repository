@@ -23,7 +23,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		updateContext: updateContext,
 		createQuery: createQuery,
 		findAll: findAll,
-		findOne: findOne,
+		find: find,
 		save: save,
 		saveAll: saveAll,
 		remove: remove,
@@ -89,8 +89,8 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		return this.dataProvider.findAll(this.config.name, params);
 	}
 
-	function findOne(id) {
-		return this.dataProvider.findOne(this.config.name, id);
+	function find(id) {
+		return this.dataProvider.find(this.config.name, id);
 	}
 
 	function remove(entity) {

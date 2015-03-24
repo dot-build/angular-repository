@@ -14,10 +14,12 @@ the methods defined in the `DataProviderInterface`.
 
 Each method has the responsibility of do server calls and return a `Promise`. The methods are:
 
+* find(endpoint, id)
 * findAll(endpoint, parameters)
-* findOne(endpoint, id)
 * save(endpoint, entity)
+* saveAll(endpoint, entitySet)
 * remove(endpoint, id)
+* removeAll(endpoint, ids)
 
 ## Repository
 

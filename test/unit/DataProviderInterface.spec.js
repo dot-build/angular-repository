@@ -14,9 +14,9 @@ describe('DataProviderInterface', function() {
 		}));
 	});
 
-	describe('@findOne(), findAll(), remove(), removeAll(), save(), saveAll() - abstract methods', function() {
+	describe('@find(), findAll(), remove(), removeAll(), save(), saveAll() - abstract methods', function() {
 		it('should throw exceptions if a method not implemented is called', inject(function($rootScope) {
-			checkPromise(instance.findOne);
+			checkPromise(instance.find);
 			checkPromise(instance.findAll);
 			checkPromise(instance.remove);
 			checkPromise(instance.removeAll);

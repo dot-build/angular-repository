@@ -91,8 +91,8 @@ describe('Repository', function() {
 		}));
 	});
 
-	describe('#findOne(String id)', function() {
-		it('should retrieve a single entity with the given id through DataProvider#findOne', inject(function(RepositoryConfig, $q, $rootScope) {
+	describe('#find(String id)', function() {
+		it('should retrieve a single entity with the given id through DataProvider#find', inject(function(RepositoryConfig, $q, $rootScope) {
 			var config = instance.config,
 				dataProvider = config.dataProvider,
 				id = 'entity-id',
@@ -102,12 +102,12 @@ describe('Repository', function() {
 					name: 'John'
 				};
 
-			spyOn(dataProvider, 'findOne').and.returnValue($q.when(entity));
+			spyOn(dataProvider, 'find').and.returnValue($q.when(entity));
 
-			var promise = instance.findOne(id),
+			var promise = instance.find(id),
 				value;
 
-			expect(dataProvider.findOne).toHaveBeenCalledWith(instance.config.name, id);
+			expect(dataProvider.find).toHaveBeenCalledWith(instance.config.name, id);
 
 			promise.then(function(e) {
 				value = e;

@@ -7,7 +7,7 @@ function DataProviderInterfaceFactory(utils, $q) {
 	DataProviderInterface.extend = extend;
 
 	DataProviderInterface.prototype = {
-		findOne: notImplemented('findOne'),
+		find: notImplemented('find'),
 		findAll: notImplemented('findAll'),
 		remove: notImplemented('remove'),
 		removeAll: notImplemented('removeAll'),
