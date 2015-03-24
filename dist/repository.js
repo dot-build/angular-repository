@@ -58,9 +58,14 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
         this.$$pagination.setState({ itemsPerPage: limitValue });
         return this;
     }
-    function page(page, limit) {
-        this.$$pagination.goToPage(page, limit);
+    function page(pageNumber, limit) {
+        this.$$pagination.goToPage(pageNumber, limit);
         return this;
+    }
+    function reset() {
+        this.$$filters.reset();
+        this.$$sorting.reset();
+        this.$$pagination.reset();
     }
     function toJSON() {
         return {
@@ -81,6 +86,7 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
         skip: skip,
         limit: limit,
         page: page,
+        reset: reset,
         toJSON: toJSON
     };
     QueryBuilder.prototype = prototype;
@@ -292,16 +298,10 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
         this.emit('error', error);
     }
     function reset() {
-        this.query.$$filters.reset();
-        this.query.$$sorting.reset();
-        this.query.$$pagination.reset();
+        this.query.reset();
     }
     function toJSON() {
-        return {
-            filters: this.query.$$filters.toJSON(),
-            pagination: this.query.$$pagination.toJSON(),
-            sorting: this.query.$$sorting.toJSON()
-        };
+        return this.query.toJSON();
     }
     var prototype = {
         INVALID_RESPONSE: 'INVALID_RESPONSE',
