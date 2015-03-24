@@ -19,7 +19,7 @@ describe('RepositoryPagination', function() {
 		}));
 	});
 
-	describe('::create', function() {
+	describe('::create()', function() {
 		it('should create a RepositoryPagination instance and set the state', inject(function(RepositoryPagination) {
 			var paginationState = {
 				currentPage: 1,
@@ -46,7 +46,7 @@ describe('RepositoryPagination', function() {
 		}));
 	});
 
-	describe('#constructor', function() {
+	describe('#constructor()', function() {
 		it('should be a subclass of EventEmitter', inject(function(EventEmitter) {
 			expect(instance instanceof EventEmitter).toBe(true);
 		}));
@@ -132,7 +132,7 @@ describe('RepositoryPagination', function() {
 		});
 	});
 
-	describe('#pageCount', function() {
+	describe('.pageCount', function() {
 		it('should have the current page count', function() {
 			instance.setState({
 				count: 20,

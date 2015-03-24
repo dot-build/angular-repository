@@ -6,7 +6,7 @@ describe('RepositoryFilter', function() {
 		instance = new RepositoryFilter();
 	}));
 
-	describe('@operators: LT, LTE, GT, GTE, IN, EQ, LK, ST, END', function() {
+	describe('::operators: LT, LTE, GT, GTE, IN, EQ, LK, ST, END', function() {
 		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositoryFilter) {
 			var whereToLook = [RepositoryFilter, instance, instance.operators],
 				constants = ['LT', 'LTE', 'GT', 'GTE', 'IN', 'EQ', 'LK', 'ST', 'END'],
@@ -17,12 +17,6 @@ describe('RepositoryFilter', function() {
 					expect(place[constantName]).toBe(values[index]);
 				});
 			});
-		}));
-	});
-
-	describe('#constructor()', function() {
-		it('should be a subclass of EventEmitter', inject(function(EventEmitter) {
-			expect(instance instanceof EventEmitter).toBe(true);
 		}));
 	});
 
@@ -37,6 +31,12 @@ describe('RepositoryFilter', function() {
 			var filters = RepositoryFilter.create([ageFilter]);
 
 			expect(filters.toJSON()).toEqual([ageFilter]);
+		}));
+	});
+
+	describe('#constructor()', function() {
+		it('should be a subclass of EventEmitter', inject(function(EventEmitter) {
+			expect(instance instanceof EventEmitter).toBe(true);
 		}));
 	});
 

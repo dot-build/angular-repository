@@ -6,7 +6,7 @@ describe('RepositorySorting', function() {
 		instance = new RepositorySorting();
 	}));
 
-	describe('@directions: ASC DESC', function() {
+	describe('::ASC & ::DESC - directions', function() {
 		it('should have ASC and DESC static values and instance values to use as sorting direction', inject(function(RepositorySorting) {
 			expect(RepositorySorting.ASC).toBe('asc');
 			expect(RepositorySorting.DESC).toBe('desc');
@@ -16,12 +16,6 @@ describe('RepositorySorting', function() {
 
 			expect(instance.directions.ASC).toBe('asc');
 			expect(instance.directions.DESC).toBe('desc');
-		}));
-	});
-
-	describe('#constructor', function() {
-		it('should be a subclass of EventEmitter', inject(function(EventEmitter) {
-			expect(instance instanceof EventEmitter).toBe(true);
 		}));
 	});
 
@@ -35,6 +29,12 @@ describe('RepositorySorting', function() {
 			var sorting = RepositorySorting.create([ageSorting]);
 
 			expect(sorting.toJSON()).toEqual([ageSorting]);
+		}));
+	});
+
+	describe('#constructor', function() {
+		it('should be a subclass of EventEmitter', inject(function(EventEmitter) {
+			expect(instance instanceof EventEmitter).toBe(true);
 		}));
 	});
 
