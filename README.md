@@ -64,12 +64,14 @@ The most common operations can be done directly in the repository, such as creat
 or remove entities. 
 
 The only one that has a different mechanism is the search, which is done through
-context objects, called `RepositoryContext`, or via QueryBuilders.
+context objects, called `RepositoryContext`, or via `QueryBuilder` objects.
 
 The query builders are a light object containing only the parameters required to perform a search.
 
 The RepositoryContext are an extension of queries, maintaining also the data that comes from backend
 whenever a parameter changes, or the last error.
+
+## RepositoryContext
 
 Each context is created only once, and it lasts in the manager until you manually destroy it, 
 so you won't lose the context state on page changes (except a full refresh with Ctrl+R), whereas
@@ -118,6 +120,27 @@ In the list view our context object is exposed, so we have access to his state a
 </div>
 ```
 
+## QueryBuilder
+
+The QueryBuilder instances are a set of chainable methods that you will use to search for things in the
+backend. Here's how:
+
+```javascript
+
+var query = QueryBuilder.create()
+	.from('User')
+	.where('name', QueryBuilder.operator.LK, 'John')
+	.where('age', QueryBuilder.operator.GTE, 21)
+	.sort('name', QueryBuilder.direction.DESC)
+	.limit(20)
+	.page(1);
+
+UserRepository.findAll(query).then(function(response){
+	// ...
+});
+
+```
+
 ## Adding methods and properties to a Repository
 
 During the repository creation additional methods and properties can be added:
@@ -143,3 +166,4 @@ Now if `ProductRepository` is injected anywhere it will have the `updateProductS
 ## API
 
 The full API of each component is [listed here](https://github.com/darlanalves/angular-repository/blob/master/API.md)
+

@@ -73,17 +73,11 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
 	}
 
 	function reset() {
-		this.query.$$filters.reset();
-		this.query.$$sorting.reset();
-		this.query.$$pagination.reset();
+		this.query.reset();
 	}
 
 	function toJSON() {
-		return {
-			filters: this.query.$$filters.toJSON(),
-			pagination: this.query.$$pagination.toJSON(),
-			sorting: this.query.$$sorting.toJSON()
-		};
+		return this.query.toJSON();
 	}
 
 	var prototype = {

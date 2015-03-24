@@ -65,6 +65,22 @@ describe('QueryBuilder', function() {
 		}));
 	});
 
+	describe('#reset()', function() {
+		it('should restore the default values for each subcomponent', inject(function(QueryBuilder) {
+			var query = new QueryBuilder();
+
+			spyOn(query.$$filters, 'reset');
+			spyOn(query.$$sorting, 'reset');
+			spyOn(query.$$pagination, 'reset');
+
+			query.reset();
+
+			expect(query.$$filters.reset).toHaveBeenCalled();
+			expect(query.$$sorting.reset).toHaveBeenCalled();
+			expect(query.$$pagination.reset).toHaveBeenCalled();
+		}));
+	});
+
 	describe('#toJSON()', function() {
 		it('should return the state in the query builder', inject(function(QueryBuilder) {
 			var query = new QueryBuilder();

@@ -110,16 +110,10 @@ describe('RepositoryContext', function() {
 	});
 
 	describe('#reset()', function() {
-		it('should reset all the stateful objects of context', function() {
-			spyOn(context.query.$$filters, 'reset');
-			spyOn(context.query.$$sorting, 'reset');
-			spyOn(context.query.$$pagination, 'reset');
-
+		it('should reset the state on query builder', function() {
+			spyOn(context.query, 'reset');
 			context.reset();
-
-			expect(context.query.$$filters.reset).toHaveBeenCalled();
-			expect(context.query.$$sorting.reset).toHaveBeenCalled();
-			expect(context.query.$$pagination.reset).toHaveBeenCalled();
+			expect(context.query.reset).toHaveBeenCalled();
 		});
 	});
 

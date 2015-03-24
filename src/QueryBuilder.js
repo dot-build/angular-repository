@@ -40,9 +40,15 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
 		return this;
 	}
 
-	function page(page, limit) {
-		this.$$pagination.goToPage(page, limit);
+	function page(pageNumber, limit) {
+		this.$$pagination.goToPage(pageNumber, limit);
 		return this;
+	}
+
+	function reset() {
+		this.$$filters.reset();
+		this.$$sorting.reset();
+		this.$$pagination.reset();
 	}
 
 	function toJSON() {
@@ -66,6 +72,7 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
 		skip: skip,
 		limit: limit,
 		page: page,
+		reset: reset,
 		toJSON: toJSON
 	};
 
