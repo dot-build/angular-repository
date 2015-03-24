@@ -1,17 +1,18 @@
 # angular-repository
 
-A data layer to automate the transport of information from any source
+A layer to abstract the data transport on higher level components (controllers, directives...).
 
 ## Introduction
 
 This library implements a thin layer of abstraction between service endpoints and consumers who need
-to do data manipulation (CRUD).
+to do data manipulation (CRUD). It is best used with RESTful backend providers.
 
 ## DataProviderInterface
 
 The actual communication with any kind of service is done with a `DataProvider`, which implements
-the methods defined in the `DataProviderInterface`. Each method has the responsibility of do
-server calls and return a `Promise`. The methods are:
+the methods defined in the `DataProviderInterface`. 
+
+Each method has the responsibility of do server calls and return a `Promise`. The methods are:
 
 * findAll(endpoint, parameters)
 * findOne(endpoint, id)
@@ -20,42 +21,59 @@ server calls and return a `Promise`. The methods are:
 
 ## Repository
 
-`Repository` is the top-level API consumable by other parts of the app. It has the following methods:
+`Repository` is the actual top-level API consumable by other parts of the app. It has the following methods:
 
-* createContext(contextName)
-* removeContext(contextName)
-* getContext(contextName)
-* updateContext(context)
 * findOne(endpoint, id)
+* findAll(query)
 * save(endpoint, entity)
+* saveAll(endpoint, entities)
 * remove(endpoint, id)
+* removeAll(endpoint, ids)
 
-It all starts with the `RepositoryManager`, where a `Repository` is created, using a 
-`RepositoryConfig` to define its parameters. Each repository performs some operations
-using a `DataProvider` object, which is passed in as a configuration.
+It all starts with the `RepositoryManager`, where a `Repository` is registered.
 
-The repositories are also registered in the `$injector`, and can later be injected into
-controllers, services or other components.
+You must register a repository to each resource existing in the backend.
+
+To ensure the configuration is correct, you must create a `RepositoryConfig` instance to define the
+repository parameters. Each repository performs some operations using a `DataProvider` object, which
+is passed in as a configuration to this instance.
+
+Here's an example:
 
 ```javascript
-// the name 'Product' is used to create the injectable name 'ProductRepository'
-// the repository can also be found with RepositoryManager.getRepository('Product');
-var repositoryConfig = new RepositoryConfig({
-	name: 'Product',
-	endpoint: '/products',
-	dataProvider: MyDataProvider
+
+// MyBackendProvider is an extension of DataProvider that implements the communication
+// User is the repository name. When you inject a repository, the name is added with a `Repository` suffix
+// so the final name will be `UserRepository` for *injection only*.
+// The repository can also be found with RepositoryManager.getRepository('User');
+var userConfig = new RepositoryConfig({
+	name: 'User',
+	dataProvider: MyBackendProvider
 });
 
-RepositoryManager.addRepository(repositoryConfig);
+// Here you are registering this repository
+RepositoryManager.addRepository(userConfig);
+
 ```
 
 ## Using the registered Repository
 
 The most common operations can be done directly in the repository, such as create, update, retrieve
-or remove entities. The only one that has a different mechanism is the search, which is done through
-context objects, called `RepositoryContext`. Each context is created only once, and it lasts in the
-manager until you manually destroy it, so you won't lose the context on page changes (except a full
-refresh with Ctrl+R)
+or remove entities. 
+
+The only one that has a different mechanism is the search, which is done through
+context objects, called `RepositoryContext`, or via QueryBuilders.
+
+The query builders are a light object containing only the parameters required to perform a search.
+
+The RepositoryContext are an extension of queries, maintaining also the data that comes from backend
+whenever a parameter changes, or the last error.
+
+Each context is created only once, and it lasts in the manager until you manually destroy it, 
+so you won't lose the context state on page changes (except a full refresh with Ctrl+R), whereas
+`QueryBuilder` instances are disposable.
+
+Here's a context example:
 
 ```javascript
 
@@ -106,7 +124,6 @@ During the repository creation additional methods and properties can be added:
 ```javascript
 var repositoryConfig = new RepositoryConfig({
 	name: 'product',
-	endpoint: '/products',
 	dataProvider: MyDataProvider
 });
 
@@ -121,3 +138,7 @@ RepositoryManager.addRepository(repositoryConfig, customProperties);
 ```
 
 Now if `ProductRepository` is injected anywhere it will have the `updateProductStatus` method
+
+## API
+
+The full API of each component is [listed here](https://github.com/darlanalves/angular-repository/blob/master/API.md)
