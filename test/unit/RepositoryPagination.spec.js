@@ -7,6 +7,18 @@ describe('RepositoryPagination', function() {
 		instance = new RepositoryPagination();
 	}));
 
+	describe('::defaults', function() {
+		it('should have the default state values for new instances', inject(function(RepositoryPagination) {
+			expect(RepositoryPagination.defaults).toEqual({
+				count: undefined,
+				currentPage: undefined,
+				itemsPerPage: undefined
+			});
+
+			expect(instance.pageCount).toBe(0);
+		}));
+	});
+
 	describe('::create', function() {
 		it('should create a RepositoryPagination instance and set the state', inject(function(RepositoryPagination) {
 			var paginationState = {
@@ -28,7 +40,7 @@ describe('RepositoryPagination', function() {
 			var defaults = RepositoryPagination.defaults;
 
 			expect(instance instanceof RepositoryPagination).toBe(true);
-			expect(instance.count).toBe(0);
+			expect(instance.count).toBe(defaults.count);
 			expect(instance.currentPage).toBe(defaults.currentPage);
 			expect(instance.itemsPerPage).toBe(defaults.itemsPerPage);
 		}));
@@ -42,9 +54,20 @@ describe('RepositoryPagination', function() {
 
 	describe('#toJSON()', function() {
 		it('should return an object with `count`, `currentPage` and `itemsPerPage` properties', function() {
-			var state = instance.toJSON();
+			var state;
 
-			expect(state.count).toBe(0);
+			state = instance.toJSON();
+			expect(state).toEqual({});
+
+			instance.setState({
+				currentPage: 1,
+				itemsPerPage: 10,
+				count: 100
+			});
+
+			state = instance.toJSON();
+
+			expect(state.count).toBe(100);
 			expect(state.currentPage).toBe(1);
 			expect(state.itemsPerPage).toBe(10);
 		});
@@ -273,7 +296,19 @@ describe('RepositoryPagination', function() {
 
 	describe('#reset()', function() {
 		it('should restore the default pagination state from RepositoryPagination.defaults', inject(function(RepositoryPagination) {
-			var defaultState = RepositoryPagination.defaults;
+			var defaultState = {};
+
+			if (undefined !== RepositoryPagination.defaults.count) {
+				defaultState.count = RepositoryPagination.defaults.count;
+			}
+
+			if (undefined !== RepositoryPagination.defaults.itemsPerPage) {
+				defaultState.itemsPerPage = RepositoryPagination.defaults.itemsPerPage;
+			}
+
+			if (undefined !== RepositoryPagination.defaults.currentPage) {
+				defaultState.currentPage = RepositoryPagination.defaults.currentPage;
+			}
 
 			var newState = {
 				currentPage: 2,

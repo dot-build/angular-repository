@@ -236,7 +236,6 @@ describe('Repository', function() {
 				expect(args[0]).toBe(qb.$$repository);
 
 				expect(args[1].pagination).toEqual({
-					count: 0,
 					currentPage: 1,
 					itemsPerPage: 2
 				});

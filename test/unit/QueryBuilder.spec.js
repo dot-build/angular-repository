@@ -88,9 +88,10 @@ describe('QueryBuilder', function() {
 					direction: QueryBuilder.direction.ASC
 				}],
 				pagination: {
-					itemsPerPage: 5,
 					currentPage: 3,
-					count: 0
+					itemsPerPage: 5
+
+					// count was not set on query construction
 				}
 			});
 

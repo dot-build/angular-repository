@@ -3,9 +3,9 @@
  */
 function RepositoryPaginationFactory(utils, EventEmitter) {
 	var paginationDefaults = {
-		count: 0,
-		currentPage: 1,
-		itemsPerPage: 10
+		count: undefined,
+		currentPage: undefined,
+		itemsPerPage: undefined
 	};
 
 	function RepositoryPagination() {
@@ -77,11 +77,21 @@ function RepositoryPaginationFactory(utils, EventEmitter) {
 		},
 
 		toJSON: function() {
-			return {
-				count: this.count,
-				currentPage: this.currentPage,
-				itemsPerPage: this.itemsPerPage
-			};
+			var state = {};
+
+			if (this.count !== undefined) {
+				state.count = this.count;
+			}
+
+			if (this.currentPage !== undefined) {
+				state.currentPage = this.currentPage;
+			}
+
+			if (this.itemsPerPage !== undefined) {
+				state.itemsPerPage = this.itemsPerPage;
+			}
+
+			return state;
 		},
 
 		setState: function(state) {
