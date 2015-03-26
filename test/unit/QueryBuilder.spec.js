@@ -18,11 +18,11 @@ describe('QueryBuilder', function() {
 	describe('#where(name, operator, value)', function() {
 		it('should add a filtering rule', inject(function(QueryBuilder, RepositoryFilter) {
 			var qb = new QueryBuilder();
-			qb.where('age', qb.operator.LT, 20);
+			qb.where('age', QueryBuilder.LT, 20);
 
 			var filter = qb.$$filters.toJSON()[0];
 			expect(filter.name).toBe('age');
-			expect(filter.operator).toBe(RepositoryFilter.LT);
+			expect(filter.operator).toBe(RepositoryFilter.prototype.operators.LT);
 			expect(filter.value).toBe(20);
 		}));
 	});
@@ -30,11 +30,11 @@ describe('QueryBuilder', function() {
 	describe('#sort(name, direction)', function() {
 		it('should add a sorting rule', inject(function(QueryBuilder, RepositorySorting) {
 			var qb = new QueryBuilder();
-			qb.sort('name', qb.direction.DESC);
+			qb.sort('name', QueryBuilder.DESC);
 
 			var sorting = qb.$$sorting.toJSON()[0];
 			expect(sorting.name).toBe('name');
-			expect(sorting.direction).toBe(RepositorySorting.DESC);
+			expect(sorting.direction).toBe(RepositorySorting.prototype.directions.DESC);
 		}));
 	});
 
@@ -89,19 +89,19 @@ describe('QueryBuilder', function() {
 				.from('User')
 				.limit(5)
 				.skip(10)
-				.where('name', QueryBuilder.operator.LK, 'john')
-				.sort('name', QueryBuilder.direction.ASC)
+				.where('name', QueryBuilder.LK, 'john')
+				.sort('name', QueryBuilder.ASC)
 				.toJSON();
 
 			expect(params).toEqual({
 				filters: [{
 					name: 'name',
-					operator: QueryBuilder.operator.LK,
+					operator: QueryBuilder.LK,
 					value: 'john'
 				}],
 				sorting: [{
 					name: 'name',
-					direction: QueryBuilder.direction.ASC
+					direction: QueryBuilder.ASC
 				}],
 				pagination: {
 					currentPage: 3,
@@ -111,6 +111,23 @@ describe('QueryBuilder', function() {
 				}
 			});
 
+		}));
+	});
+
+	describe('!constant values (operators and sorting directions)', function() {
+		it('should expose the filter operators and sorting directions as static values', inject(function(RepositoryFilter, RepositorySorting, QueryBuilder) {
+			var operators = RepositoryFilter.prototype.operators,
+				directions = RepositorySorting.prototype.directions;
+
+			Object.keys(operators).forEach(function(key) {
+				var value = operators[key];
+				expect(QueryBuilder[key]).toBe(value);
+			});
+
+			Object.keys(directions).forEach(function(key) {
+				var value = directions[key];
+				expect(QueryBuilder[key]).toBe(value);
+			});
 		}));
 	});
 });

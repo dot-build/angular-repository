@@ -1,7 +1,7 @@
 /**
  * @factory QueryBuilder
  */
-function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagination) {
+function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagination, utils) {
 	function QueryBuilder() {
 		this.$$filters = RepositoryFilter.create();
 		this.$$sorting = RepositorySorting.create();
@@ -79,8 +79,11 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
 	QueryBuilder.prototype = prototype;
 	QueryBuilder.create = create;
 
-	QueryBuilder.operator = prototype.operator = RepositoryFilter.prototype.operators;
-	QueryBuilder.direction = prototype.direction = RepositorySorting.prototype.directions;
+	var operators = RepositoryFilter.prototype.operators,
+		directions = RepositorySorting.prototype.directions;
+
+	utils.merge(QueryBuilder, operators);
+	utils.merge(QueryBuilder, directions);
 
 	return QueryBuilder;
 }
