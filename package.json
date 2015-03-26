@@ -1,7 +1,7 @@
 {
   "name": "ngrepository",
   "description": "",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "devDependencies": {
     "angular-di-annotations": "^0.2.0",
     "gulp": "~3.8.0",
