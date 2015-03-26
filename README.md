@@ -129,9 +129,9 @@ backend. Here's how:
 
 var query = QueryBuilder.create()
 	.from('User')
-	.where('name', QueryBuilder.operator.LK, 'John')
-	.where('age', QueryBuilder.operator.GTE, 21)
-	.sort('name', QueryBuilder.direction.DESC)
+	.where('name', QueryBuilder.LK, 'John')
+	.where('age', QueryBuilder.GTE, 21)
+	.sort('name', QueryBuilder.DESC)
 	.limit(20)
 	.page(1);
 
