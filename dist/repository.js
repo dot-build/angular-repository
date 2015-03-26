@@ -247,7 +247,7 @@ RepositoryConfigFactory.$inject = [
     'DataProviderInterface',
     'utils'
 ];
-function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
+function RepositoryContextFactory(EventEmitter, utils, QueryBuilder, $window) {
     function RepositoryContext(name) {
         EventEmitter.call(this);
         var query = QueryBuilder.create(), boundUpdateFn = update.bind(this);
@@ -265,6 +265,9 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
         query.$$sorting.setState(sorting);
         query.$$pagination.setState(pagination);
     }
+    function setTimeout(timeout) {
+        this.updateTimeout = timeout;
+    }
     function filters() {
         return this.query.$$filters;
     }
@@ -275,6 +278,16 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
         return this.query.$$pagination;
     }
     function update() {
+        if (this.updateTimeout > 0) {
+            if (this.$$lastUpdate) {
+                $window.clearTimeout(this.$$lastUpdate);
+            }
+            this.$$lastUpdate = $window.setTimeout(triggerUpdate.bind(this), this.updateTimeout);
+        } else {
+            triggerUpdate.call(this);
+        }
+    }
+    function triggerUpdate() {
         this.emit('update', this);
     }
     function setData(dataTransferObject) {
@@ -315,7 +328,8 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
         reset: reset,
         toJSON: toJSON,
         setData: setData,
-        setError: setError
+        setError: setError,
+        setTimeout: setTimeout
     };
     utils.inherits(RepositoryContext, EventEmitter, prototype);
     return RepositoryContext;
@@ -324,7 +338,8 @@ angular.module('repository').factory('RepositoryContext', RepositoryContextFacto
 RepositoryContextFactory.$inject = [
     'EventEmitter',
     'utils',
-    'QueryBuilder'
+    'QueryBuilder',
+    '$window'
 ];
 function RepositoryFilterFactory(EventEmitter, utils) {
     function RepositoryFilter() {
@@ -707,10 +722,11 @@ RepositorySortingFactory.$inject = [
     'utils'
 ];
 function utilsFactory() {
-    var utils = {};
-    utils.inherits = inherits;
-    utils.extend = extend;
-    utils.merge = merge;
+    var utils = {
+        inherits: inherits,
+        extend: extend,
+        merge: merge
+    };
     return utils;
     function merge(destination, source) {
         Object.keys(source).forEach(function (key) {
