@@ -87,6 +87,7 @@
 	# page(Number page, Number [limit])
 	# reset()
 	# toJSON()
+	
 
 
 ## RepositoryContext
@@ -94,6 +95,7 @@
 	# constructor(String name)
 	# initialize(Object filters, Object sorting, Object pagination)
 	# update()
+	# setTimeout(Number timeout)
 	# filters()
 	# sorting()
 	# pagination()

@@ -1,7 +1,7 @@
 /**
  * The context is a set of objects that store state and represent a viewpoint of a given resource
  * Each context holds pagination, sorting and filtering state that correspond to a way to see a list
- * of any resource type.
+ * of any resource type. These values are kept through an instance of a QueryBuilder
  */
 describe('RepositoryContext', function() {
 	var context, CONTEXT_NAME = 'test-context';
@@ -61,6 +61,31 @@ describe('RepositoryContext', function() {
 
 			expect(updateSpy.calls.count()).toEqual(1);
 		});
+
+		it('should debounce the update event if the context has a property "updateTimeout" greater than zero', function(done) {
+			context.setTimeout(5);
+
+			expect(context.updateTimeout).toBe(5);
+
+			var updateSpy = jasmine.createSpy('update');
+			context.on('update', updateSpy);
+
+			context.update();
+			context.update();
+			context.update();
+
+			setTimeout(function() {
+				expect(updateSpy.calls.count()).toEqual(1);
+				done();
+			}, 50);
+		});
+	});
+
+	describe('#setTimeout(Number timeout)', function() {
+		it('should set a property used to debounce sequencial updates', inject(function() {
+			context.setTimeout(5);
+			expect(context.updateTimeout).toBe(5);
+		}));
 	});
 
 	describe('#filters()', function() {
@@ -69,6 +94,16 @@ describe('RepositoryContext', function() {
 			expect(filters).not.toBe(undefined);
 			expect(filters instanceof RepositoryFilter).toBe(true);
 		}));
+
+		it('should trigger the update event if the pagination changes', function() {
+			var spy = jasmine.createSpy();
+
+			context.on('update', spy);
+			var filters = context.filters();
+			filters.where('name', 'value');
+
+			expect(spy).toHaveBeenCalled();
+		});
 	});
 
 	describe('#sorting()', function() {
@@ -82,7 +117,6 @@ describe('RepositoryContext', function() {
 			var spy = jasmine.createSpy();
 
 			context.on('update', spy);
-
 			context.sorting().sort('name');
 
 			expect(spy).toHaveBeenCalled();

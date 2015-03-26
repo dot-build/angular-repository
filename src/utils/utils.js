@@ -2,11 +2,11 @@
  * @factory utils
  */
 function utilsFactory() {
-	var utils = {};
-
-	utils.inherits = inherits;
-	utils.extend = extend;
-	utils.merge = merge;
+	var utils = {
+		inherits: inherits,
+		extend: extend,
+		merge: merge
+	};
 
 	return utils;
 

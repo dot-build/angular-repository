@@ -1,7 +1,7 @@
 /**
  * @factory RepositoryContext
  */
-function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
+function RepositoryContextFactory(EventEmitter, utils, QueryBuilder, $window) {
 	function RepositoryContext(name) {
 		EventEmitter.call(this);
 
@@ -27,6 +27,10 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
 		query.$$pagination.setState(pagination);
 	}
 
+	function setTimeout(timeout) {
+		this.updateTimeout = timeout;
+	}
+
 	function filters() {
 		return this.query.$$filters;
 	}
@@ -40,6 +44,18 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
 	}
 
 	function update() {
+		if (this.updateTimeout > 0) {
+			if (this.$$lastUpdate) {
+				$window.clearTimeout(this.$$lastUpdate);
+			}
+
+			this.$$lastUpdate = $window.setTimeout(triggerUpdate.bind(this), this.updateTimeout);
+		} else {
+			triggerUpdate.call(this);
+		}
+	}
+
+	function triggerUpdate() {
 		this.emit('update', this);
 	}
 
@@ -91,7 +107,8 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder) {
 		reset: reset,
 		toJSON: toJSON,
 		setData: setData,
-		setError: setError
+		setError: setError,
+		setTimeout: setTimeout
 	};
 
 	utils.inherits(RepositoryContext, EventEmitter, prototype);
