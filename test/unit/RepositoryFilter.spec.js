@@ -122,6 +122,18 @@ describe('RepositoryFilter', function() {
 			expect(firstFilter.value).toBe('John');
 		});
 
+		it('should NOT add a filter twice with the same name', function() {
+			instance.where('name', 'John');
+			instance.where('name', 'Paul');
+
+			expect(instance.$$filters.length).toBe(1);
+
+			var firstFilter = instance.$$filters[0];
+			expect(firstFilter.name).toBe('name');
+			expect(firstFilter.operator).toBe(instance.EQ);
+			expect(firstFilter.value).toBe('Paul');
+		});
+
 		it('should NOT accept invalid operators', function() {
 			instance.where('name', 'ZZ', 'John');
 			expect(instance.$$filters.length).toBe(0);

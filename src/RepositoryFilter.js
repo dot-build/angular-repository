@@ -65,6 +65,15 @@ function RepositoryFilterFactory(EventEmitter, utils) {
 		}
 
 		if (typeof filter === 'object' && filter !== null && 'name' in filter && 'value' in filter && 'operator' in filter) {
+			for (var i = 0, max = this.$$filters.length; i < max; i++) {
+				// prevent duplicated filters
+				if (this.$$filters[i].name === filter.name) {
+					this.$$filters[i].operator = filter.operator;
+					this.$$filters[i].value = filter.value;
+					return;
+				}
+			}
+
 			this.$$filters.push(filter);
 		}
 	}
