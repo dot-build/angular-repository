@@ -10,7 +10,9 @@ to do data manipulation (CRUD). It is best used with RESTful backend providers.
 ## DataProviderInterface
 
 The actual communication with any kind of service is done with a `DataProvider`, which implements
-the methods defined in the `DataProviderInterface`. 
+the methods defined in the `DataProviderInterface`.
+
+A sample provider [can be seen here](https://github.com/darlanalves/angular-repository/blob/master/BasicDataProvider.js)
 
 Each method has the responsibility of do server calls and return a `Promise`. The methods are:
 
