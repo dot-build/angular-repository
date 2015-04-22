@@ -120,6 +120,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         getContext: getContext,
         updateContext: updateContext,
         createQuery: createQuery,
+        findBy: findBy,
         findAll: findAll,
         find: find,
         save: save,
@@ -160,6 +161,26 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
     }
     function createQuery() {
         return QueryBuilder.create().from(this.config.name);
+    }
+    var InvalidPropertyError = new Error('Missing filter name');
+    var InvalidValueError = new Error('Missing filter value');
+    function findBy(property, operator, value) {
+        if (property === undefined) {
+            return $q.reject(InvalidPropertyError);
+        }
+        var argCount = arguments.length;
+        if (!operator || operator && argCount === 3 && value === undefined) {
+            return $q.reject(InvalidValueError);
+        }
+        var query = this.createQuery();
+        if (argCount === 3) {
+            query.where(property, operator, value);
+        } else {
+            query.where(property, operator);
+        }
+        return this.findAll(query).then(function (response) {
+            return response.data;
+        });
     }
     function findAll(queryBuilder) {
         if (queryBuilder instanceof QueryBuilder === false || queryBuilder.getRepository() !== this.config.name) {

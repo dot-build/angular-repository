@@ -262,6 +262,65 @@ describe('Repository', function() {
 		});
 	});
 
+	describe('#findBy(String field, value)', function() {
+		it('should create a query builder with a single filter and return a call to #findAll()', inject(function($q, $rootScope, QueryBuilder) {
+			var data = [];
+
+			spyOn(instance, 'findAll').and.returnValue($q.when({
+				data: data
+			}));
+
+			var success = jasmine.createSpy('success');
+			instance.findBy('foo.id', '123').then(success);
+			$rootScope.$digest();
+
+			expect(instance.findAll).toHaveBeenCalled();
+			var qb = instance.findAll.calls.argsFor(0)[0];
+			var filter = qb.toJSON().filters[0];
+
+			expect(filter.name).toBe('foo.id');
+			expect(filter.operator).toBe(QueryBuilder.EQ);
+			expect(filter.value).toBe('123');
+
+			expect(success).toHaveBeenCalled();
+			expect(success.calls.argsFor(0)[0]).toBe(data);
+		}));
+
+		it('should allow any operator other that EQ if the method is called with 3 arguments', inject(function($q, $rootScope, QueryBuilder) {
+			var data = [];
+
+			spyOn(instance, 'findAll').and.returnValue($q.when({}));
+
+			instance.findBy('user.age', QueryBuilder.LTE, 25);
+			$rootScope.$digest();
+
+			expect(instance.findAll).toHaveBeenCalled();
+			var qb = instance.findAll.calls.argsFor(0)[0];
+			var filter = qb.toJSON().filters[0];
+
+			expect(filter.name).toBe('user.age');
+			expect(filter.operator).toBe(QueryBuilder.LTE);
+			expect(filter.value).toBe(25);
+		}));
+
+		it('should return an error if a property or a value are not specified', inject(function($rootScope, QueryBuilder) {
+			function unroll(promise) {
+				promise.then(null, function(value) {
+					promise.result = value;
+				});
+
+				return promise;
+			}
+
+			var InvalidPropertyError = unroll(instance.findBy());
+			var InvalidValueError = unroll(instance.findBy('name', QueryBuilder.LTE, undefined));
+			$rootScope.$digest();
+
+			expect(InvalidPropertyError.result.message).toBe('Missing filter name');
+			expect(InvalidValueError.result.message).toBe('Missing filter value');
+		}));
+	});
+
 	describe('#updateContext(RepositoryContext context)', function() {
 		it('should call the dataProvider and update the context data based on context state. ' +
 			'Must be automatically on context changes', inject(function($q, $rootScope) {
