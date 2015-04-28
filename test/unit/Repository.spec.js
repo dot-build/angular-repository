@@ -287,8 +287,6 @@ describe('Repository', function() {
 		}));
 
 		it('should allow any operator other that EQ if the method is called with 3 arguments', inject(function($q, $rootScope, QueryBuilder) {
-			var data = [];
-
 			spyOn(instance, 'findAll').and.returnValue($q.when({}));
 
 			instance.findBy('user.age', QueryBuilder.LTE, 25);

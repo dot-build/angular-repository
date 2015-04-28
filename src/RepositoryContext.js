@@ -1,11 +1,11 @@
 /**
  * @factory RepositoryContext
  */
-function RepositoryContextFactory(EventEmitter, utils, QueryBuilder, $window) {
+function RepositoryContextFactory(EventEmitter, utils, ContextQueryBuilder, $window) {
 	function RepositoryContext(name) {
 		EventEmitter.call(this);
 
-		var query = QueryBuilder.create(),
+		var query = ContextQueryBuilder.create(),
 			boundUpdateFn = update.bind(this);
 
 		this.name = name;
@@ -13,10 +13,7 @@ function RepositoryContextFactory(EventEmitter, utils, QueryBuilder, $window) {
 		this.error = null;
 		this.query = query;
 
-		// the QueryBuilder instance won't trigger itself the events, this is a context-only thing
-		query.$$filters.on('update', boundUpdateFn);
-		query.$$sorting.on('update', boundUpdateFn);
-		query.$$pagination.on('update', boundUpdateFn);
+		query.on('update', boundUpdateFn);
 	}
 
 	function initialize(filters, sorting, pagination) {

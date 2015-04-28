@@ -1,6 +1,48 @@
 (function(undefined){
 
 angular.module('repository', ['EventEmitter']);
+function ContextQueryBuilderFactory(utils, QueryBuilder, EventEmitter) {
+    function ContextQueryBuilder() {
+        QueryBuilder.call(this);
+        EventEmitter.call(this);
+        function update() {
+            var args = ['update'];
+            args.push.apply(args, arguments);
+            this.emit.apply(this, args);
+        }
+        var boundUpdateFn = update.bind(this);
+        this.$$filters.on('update', boundUpdateFn);
+        this.$$sorting.on('update', boundUpdateFn);
+        this.$$pagination.on('update', boundUpdateFn);
+    }
+    function queue() {
+        this.suspendEvents();
+        return this;
+    }
+    function exec() {
+        this.resumeEvents();
+        this.emit('update', this);
+        return this;
+    }
+    var prototype = {
+        queue: queue,
+        exec: exec
+    };
+    utils.merge(prototype, EventEmitter.prototype);
+    utils.merge(prototype, QueryBuilder.prototype);
+    ContextQueryBuilder.prototype = prototype;
+    ContextQueryBuilder.prototype.constructor = ContextQueryBuilder;
+    ContextQueryBuilder.create = function () {
+        return new ContextQueryBuilder();
+    };
+    return ContextQueryBuilder;
+}
+angular.module('repository').factory('ContextQueryBuilder', ContextQueryBuilderFactory);
+ContextQueryBuilderFactory.$inject = [
+    'utils',
+    'QueryBuilder',
+    'EventEmitter'
+];
 function DataProviderInterfaceFactory(utils, $q) {
     function DataProviderInterface() {
     }
@@ -268,17 +310,15 @@ RepositoryConfigFactory.$inject = [
     'DataProviderInterface',
     'utils'
 ];
-function RepositoryContextFactory(EventEmitter, utils, QueryBuilder, $window) {
+function RepositoryContextFactory(EventEmitter, utils, ContextQueryBuilder, $window) {
     function RepositoryContext(name) {
         EventEmitter.call(this);
-        var query = QueryBuilder.create(), boundUpdateFn = update.bind(this);
+        var query = ContextQueryBuilder.create(), boundUpdateFn = update.bind(this);
         this.name = name;
         this.data = null;
         this.error = null;
         this.query = query;
-        query.$$filters.on('update', boundUpdateFn);
-        query.$$sorting.on('update', boundUpdateFn);
-        query.$$pagination.on('update', boundUpdateFn);
+        query.on('update', boundUpdateFn);
     }
     function initialize(filters, sorting, pagination) {
         var query = this.query;
@@ -359,7 +399,7 @@ angular.module('repository').factory('RepositoryContext', RepositoryContextFacto
 RepositoryContextFactory.$inject = [
     'EventEmitter',
     'utils',
-    'QueryBuilder',
+    'ContextQueryBuilder',
     '$window'
 ];
 function RepositoryFilterFactory(EventEmitter, utils) {

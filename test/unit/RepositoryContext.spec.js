@@ -13,9 +13,9 @@ describe('RepositoryContext', function() {
 	}));
 
 	describe('#constructor(String name)', function() {
-		it('should initialize the instance with default properties and a query builder', inject(function(EventEmitter, QueryBuilder) {
+		it('should initialize the instance with default properties and a query builder', inject(function(EventEmitter, ContextQueryBuilder) {
 			expect(context instanceof EventEmitter).toBe(true);
-			expect(context.query instanceof QueryBuilder).toBe(true);
+			expect(context.query instanceof ContextQueryBuilder).toBe(true);
 			expect(context.name).toBe(CONTEXT_NAME);
 			expect(context.data).toBe(null);
 			expect(context.error).toBe(null);
