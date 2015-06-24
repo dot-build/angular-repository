@@ -1,7 +1,7 @@
 /**
  * @factory Repository
  */
-function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig, QueryBuilder) {
+function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig, QueryBuilder, RepositoryQueryBuilder) {
 
 	function Repository(config) {
 		if (config instanceof RepositoryConfig === false) {
@@ -22,6 +22,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 		getContext: getContext,
 		updateContext: updateContext,
 		createQuery: createQuery,
+		where: where,
 		findBy: findBy,
 		findAll: findAll,
 		find: find,
@@ -77,7 +78,14 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function createQuery() {
-		return QueryBuilder.create().from(this.config.name);
+		return RepositoryQueryBuilder.create().from(this.config.name);
+	}
+
+	function where () {
+		var query = this.createQuery();
+		query.where.apply(query, arguments);
+
+		return query;
 	}
 
 	var InvalidPropertyError = new Error('Missing filter name');
@@ -108,7 +116,11 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
 	}
 
 	function findAll(queryBuilder) {
-		if (queryBuilder instanceof QueryBuilder === false || queryBuilder.getRepository() !== this.config.name) {
+		if (queryBuilder.getRepository() !== this.config.name || !(
+				queryBuilder instanceof QueryBuilder ||
+				queryBuilder instanceof RepositoryQueryBuilder
+			)
+		) {
 			throw new Error('Invalid query builder');
 		}
 

@@ -213,10 +213,25 @@ describe('Repository', function() {
 	});
 
 	describe('#createQuery()', function() {
-		it('should create a instance of QueryBuilder bound to the repository', inject(function(QueryBuilder) {
+		it('should create a instance of RepositoryQueryBuilder bound to the repository', inject(function(RepositoryQueryBuilder) {
 			var query = instance.createQuery();
-			expect(query instanceof QueryBuilder).toBe(true);
+			expect(query instanceof RepositoryQueryBuilder).toBe(true);
 			expect(query.$$repository).toBe(instance.config.name);
+		}));
+	});
+
+	describe('#where()', function() {
+		it('should create a instance of RepositoryQueryBuilder bound to the repository and call the where() method on instance', inject(function(RepositoryQueryBuilder) {
+			var query = instance.where('name', 'foo');
+			var filter = query.toJSON().filters[0];
+
+			expect(query instanceof RepositoryQueryBuilder).toBe(true);
+			expect(query.$$repository).toBe(instance.config.name);
+			expect(filter).toEqual({
+				name: 'name',
+				value: 'foo',
+				operator: '='
+			});
 		}));
 	});
 
