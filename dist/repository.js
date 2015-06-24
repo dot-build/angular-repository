@@ -145,7 +145,7 @@ QueryBuilderFactory.$inject = [
     'RepositoryPagination',
     'utils'
 ];
-function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig, QueryBuilder) {
+function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, RepositoryConfig, QueryBuilder, RepositoryQueryBuilder) {
     function Repository(config) {
         if (config instanceof RepositoryConfig === false) {
             throw new Error('Invalid config');
@@ -162,6 +162,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         getContext: getContext,
         updateContext: updateContext,
         createQuery: createQuery,
+        where: where,
         findBy: findBy,
         findAll: findAll,
         find: find,
@@ -202,7 +203,12 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         });
     }
     function createQuery() {
-        return QueryBuilder.create().from(this.config.name);
+        return RepositoryQueryBuilder.create().from(this.config.name);
+    }
+    function where() {
+        var query = this.createQuery();
+        query.where.apply(query, arguments);
+        return query;
     }
     var InvalidPropertyError = new Error('Missing filter name');
     var InvalidValueError = new Error('Missing filter value');
@@ -225,7 +231,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         });
     }
     function findAll(queryBuilder) {
-        if (queryBuilder instanceof QueryBuilder === false || queryBuilder.getRepository() !== this.config.name) {
+        if (queryBuilder.getRepository() !== this.config.name || !(queryBuilder instanceof QueryBuilder || queryBuilder instanceof RepositoryQueryBuilder)) {
             throw new Error('Invalid query builder');
         }
         var params = queryBuilder.toJSON();
@@ -285,7 +291,8 @@ RepositoryFactory.$inject = [
     'utils',
     'RepositoryContext',
     'RepositoryConfig',
-    'QueryBuilder'
+    'QueryBuilder',
+    'RepositoryQueryBuilder'
 ];
 function RepositoryConfigFactory($injector, DataProviderInterface, utils) {
     function RepositoryConfig(config) {
@@ -678,6 +685,44 @@ function RepositoryPaginationFactory(utils, EventEmitter) {
 angular.module('repository').factory('RepositoryPagination', RepositoryPaginationFactory);
 RepositoryPaginationFactory.$inject = [
     'utils',
+    'EventEmitter'
+];
+function RepositoryQueryBuilderFactory($injector, utils, QueryBuilder, EventEmitter) {
+    function RepositoryQueryBuilder() {
+        QueryBuilder.call(this);
+        EventEmitter.call(this);
+        function update() {
+            var args = ['update'];
+            args.push.apply(args, arguments);
+            this.emit.apply(this, args);
+        }
+        var boundUpdateFn = update.bind(this);
+        this.$$filters.on('update', boundUpdateFn);
+        this.$$sorting.on('update', boundUpdateFn);
+        this.$$pagination.on('update', boundUpdateFn);
+    }
+    function exec() {
+        var RepositoryManager = $injector.get('RepositoryManager');
+        return RepositoryManager.executeQuery(this);
+    }
+    function Dummy() {
+    }
+    Dummy.prototype = QueryBuilder.prototype;
+    var prototype = new Dummy();
+    utils.merge(prototype, EventEmitter.prototype);
+    prototype.exec = exec;
+    RepositoryQueryBuilder.prototype = prototype;
+    RepositoryQueryBuilder.prototype.constructor = RepositoryQueryBuilder;
+    RepositoryQueryBuilder.create = function () {
+        return new RepositoryQueryBuilder();
+    };
+    return RepositoryQueryBuilder;
+}
+angular.module('repository').factory('RepositoryQueryBuilder', RepositoryQueryBuilderFactory);
+RepositoryQueryBuilderFactory.$inject = [
+    '$injector',
+    'utils',
+    'QueryBuilder',
     'EventEmitter'
 ];
 function RepositorySortingFactory(EventEmitter, utils) {

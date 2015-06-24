@@ -1,16 +1,5 @@
 
 
-## DataProviderInterface
-
-	:: extend(Object prototype)
-	@ find(), findAll(), remove(), removeAll(), save(), saveAll() - abstract methods
-
-
-## RepositoryConfig
-
-	# constructor(Object options)
-
-
 ## Repository
 
 	:: extend(Object [prototype])
@@ -24,8 +13,81 @@
 	# remove(String id)
 	# removeAll(String[] id)
 	# createQuery()
+	# where()
 	# findAll(QueryBuilder query)
+	# findBy(String field, value)
 	# updateContext(RepositoryContext context)
+
+
+## ContextQueryBuilder
+
+	# constructor()
+	# queue()
+	# exec
+
+
+## RepositorySorting
+
+	:: ASC & ::DESC - directions
+	:: create
+	# constructor
+	# add(Array sorting)
+	# sort(String name, String direction)
+	# invert(String name)
+	# remove(String name)
+	# reset()
+	# toJSON()
+	# toArray()
+	# getSorting(String name)
+	# hasSorting(String name)
+
+
+## QueryBuilder
+
+	:: create()
+	# from(String repository)
+	# where(name, operator, value)
+	# sort(name, direction)
+	# limit(Number limit)
+	# skip(Number skip)
+	# page(Number page, Number [limit])
+	# reset()
+	# toJSON()
+	
+
+
+## RepositoryManager
+
+	# hasRepository(String name)
+	# addRepository(RepositoryConfig config, Object [properties])
+	# getRepository(String name)
+	# executeQuery(QueryBuilder query)
+
+
+## RepositoryQueryBuilder
+
+	# constructor()
+	# exec
+
+
+## RepositoryFilter
+
+	:: operators: LT, LTE, GT, GTE, IN, EQ, LK, ST, END
+	:: create(Object[] filters)
+	# constructor()
+	# getFilter(String name)
+	# setState(Array filters)
+	# where(String name, String operator, Mixed value)
+	# remove(String name)
+	# reset()
+	# toJSON()
+	# toArray()
+
+
+## DataProviderInterface
+
+	:: extend(Object prototype)
+	@ find(), findAll(), remove(), removeAll(), save(), saveAll() - abstract methods
 
 
 ## RepositoryPagination
@@ -46,48 +108,9 @@
 	# goToPage(Number page, Number [limit])
 
 
-## RepositorySorting
+## RepositoryConfig
 
-	:: ASC & ::DESC - directions
-	:: create
-	# constructor
-	# add(Array sorting)
-	# sort(String name, String direction)
-	# invert(String name)
-	# remove(String name)
-	# reset()
-	# toJSON()
-	# toArray()
-	# getSorting(String name)
-	# hasSorting(String name)
-
-
-## RepositoryFilter
-
-	:: operators: LT, LTE, GT, GTE, IN, EQ, LK, ST, END
-	:: create(Object[] filters)
-	# constructor()
-	# getFilter(String name)
-	# setState(Array filters)
-	# where(String name, String operator, Mixed value)
-	# remove(String name)
-	# reset()
-	# toJSON()
-	# toArray()
-
-
-## QueryBuilder
-
-	:: create()
-	# from(String repository)
-	# where(name, operator, value)
-	# sort(name, direction)
-	# limit(Number limit)
-	# skip(Number skip)
-	# page(Number page, Number [limit])
-	# reset()
-	# toJSON()
-	
+	# constructor(Object options)
 
 
 ## RepositoryContext
@@ -103,11 +126,3 @@
 	# toJSON()
 	# setData(Object dto)
 	# setError(Mixed error)
-
-
-## RepositoryManager
-
-	# hasRepository(String name)
-	# addRepository(RepositoryConfig config, Object [properties])
-	# getRepository(String name)
-	# executeQuery(QueryBuilder query)
