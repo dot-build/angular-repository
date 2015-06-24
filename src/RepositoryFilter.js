@@ -64,12 +64,16 @@ function RepositoryFilterFactory(EventEmitter, utils) {
 			};
 		}
 
+		var current, i, max;
+
 		if (typeof filter === 'object' && filter !== null && 'name' in filter && 'value' in filter && 'operator' in filter) {
-			for (var i = 0, max = this.$$filters.length; i < max; i++) {
+			for (i = 0, max = this.$$filters.length; i < max; i++) {
+				current = this.$$filters[i];
+
 				// prevent duplicated filters
-				if (this.$$filters[i].name === filter.name) {
-					this.$$filters[i].operator = filter.operator;
-					this.$$filters[i].value = filter.value;
+				if (current.name === filter.name && current.operator === filter.operator) {
+					current.operator = filter.operator;
+					current.value = filter.value;
 					return;
 				}
 			}
