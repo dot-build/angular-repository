@@ -49,6 +49,8 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
 		this.$$filters.reset();
 		this.$$sorting.reset();
 		this.$$pagination.reset();
+
+		return this;
 	}
 
 	function toJSON() {

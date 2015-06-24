@@ -73,11 +73,13 @@ describe('QueryBuilder', function() {
 			spyOn(query.$$sorting, 'reset');
 			spyOn(query.$$pagination, 'reset');
 
-			query.reset();
+			var chain = query.reset();
 
 			expect(query.$$filters.reset).toHaveBeenCalled();
 			expect(query.$$sorting.reset).toHaveBeenCalled();
 			expect(query.$$pagination.reset).toHaveBeenCalled();
+
+			expect(chain).toBe(query);
 		}));
 	});
 
