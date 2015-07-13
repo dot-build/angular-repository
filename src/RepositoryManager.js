@@ -2,6 +2,8 @@
  * @provider RepositoryManager
  */
 function RepositoryManagerProvider($provide) {
+	var defaultConfig = {};
+
 	function RepositoryManagerFactory(Repository, RepositoryConfig) {
 		var repositoryMap = {};
 
@@ -34,7 +36,9 @@ function RepositoryManagerProvider($provide) {
 
 			repositoryMap[name] = instance;
 
-			if (config.autoRegister !== false) {
+			if (config.autoRegister === true ||
+				(defaultConfig.autoRegister && config.autoRegister !== false)) {
+
 				// repository is now injectable
 				$provide.value(name + repositoryManager.suffix, instance);
 			}
@@ -66,4 +70,9 @@ function RepositoryManagerProvider($provide) {
 	}
 
 	this.$get = ['Repository', 'RepositoryConfig', 'QueryBuilder', RepositoryManagerFactory];
+
+	this.config = function(values) {
+		if (!arguments.length) return defaultConfig;
+		angular.extend(defaultConfig, values);
+	};
 }

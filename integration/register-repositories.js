@@ -1,8 +1,24 @@
-angular.module('integration').run(function(RepositoryManager, RepositoryConfig, DefaultDataProvider) {
-	var productConfig = new RepositoryConfig({
-		name: 'Product',
-		dataProvider: DefaultDataProvider
+(function(module) {
+	module.config(function(RepositoryManagerProvider) {
+		RepositoryManagerProvider.config({
+			autoRegister: true
+		});
 	});
 
-	RepositoryManager.addRepository(productConfig);
-});
+	module.run(function(RepositoryManager, RepositoryConfig, DefaultDataProvider) {
+		var productConfig = new RepositoryConfig({
+			name: 'Product',
+			dataProvider: DefaultDataProvider
+		});
+
+		var otherRepoConfig = new RepositoryConfig({
+			name: 'Other',
+			dataProvider: DefaultDataProvider,
+			autoRegister: false
+		});
+
+		RepositoryManager.addRepository(otherRepoConfig);
+		RepositoryManager.addRepository(productConfig);
+	});
+
+})(angular.module('integration'));

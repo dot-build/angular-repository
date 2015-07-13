@@ -29,6 +29,7 @@ describe('RepositoryManager', function() {
 				doSomething: function() {}
 			};
 
+			repositoryConfig.autoRegister = true;
 			var repository = RepositoryManager.addRepository(repositoryConfig, properties);
 
 			expect($injector.has(repositoryNameInjectable)).toBe(true);
@@ -39,7 +40,7 @@ describe('RepositoryManager', function() {
 			expect(registeredRepository.doSomething).toBe(properties.doSomething);
 		}));
 
-		it('should NOT register into $provide if autoRegister = false in the config', inject(function(RepositoryManager, Repository, $injector) {
+		it('should NOT register into $provide if autoRegister == false in the config', inject(function(RepositoryManager, Repository, $injector) {
 			var repositoryNameInjectable = repositoryConfig.name + RepositoryManager.suffix;
 			repositoryConfig.autoRegister = false;
 
