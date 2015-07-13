@@ -527,6 +527,7 @@ RepositoryFilterFactory.$inject = [
     'utils'
 ];
 function RepositoryManagerProvider($provide) {
+    var defaultConfig = {};
     function RepositoryManagerFactory(Repository, RepositoryConfig) {
         var repositoryMap = {};
         var repositoryManager = {
@@ -552,7 +553,7 @@ function RepositoryManagerProvider($provide) {
                 instance = new Repository(config);
             }
             repositoryMap[name] = instance;
-            if (config.autoRegister !== false) {
+            if (config.autoRegister === true || defaultConfig.autoRegister && config.autoRegister !== false) {
                 $provide.value(name + repositoryManager.suffix, instance);
             }
             return instance;
@@ -580,6 +581,11 @@ function RepositoryManagerProvider($provide) {
         'QueryBuilder',
         RepositoryManagerFactory
     ];
+    this.config = function (values) {
+        if (!arguments.length)
+            return defaultConfig;
+        angular.extend(defaultConfig, values);
+    };
 }
 angular.module('repository').provider('RepositoryManager', RepositoryManagerProvider);
 RepositoryManagerProvider.$inject = ['$provide'];
