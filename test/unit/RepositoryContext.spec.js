@@ -186,7 +186,7 @@ describe('RepositoryContext', function() {
 	});
 
 	describe('#setData(Object dto)', function() {
-		it('should update the context data/state, emit "change" event and return true', function() {
+		it('should update the context data/state, emit "change" and "done" events and return true', function() {
 			expect(context.data).toBe(null);
 			expect(context.error).toBe(null);
 
@@ -204,7 +204,10 @@ describe('RepositoryContext', function() {
 				}]
 			};
 
-			spyOn(context, 'emit');
+			var onChange = jasmine.createSpy('change');
+			var onDone = jasmine.createSpy('done');
+			context.on('change', onChange);
+			context.on('done', onDone);
 
 			context.error = {};
 			var response = context.setData(dto);
@@ -216,7 +219,12 @@ describe('RepositoryContext', function() {
 			expect(context.data[1].name).toBe('Bob');
 			expect(context.error).toBe(null);
 			expect(response).toBe(true);
-			expect(context.emit).toHaveBeenCalledWith('change', context.data);
+
+			expect(onChange).toHaveBeenCalledWith(dto.data);
+			expect(onDone).toHaveBeenCalledWith({
+				data: dto.data,
+				error: false
+			});
 		});
 
 		it('should NOT change the context data and change the context error if the DTO format is invalid, emit "error" and return false', function() {
@@ -229,7 +237,10 @@ describe('RepositoryContext', function() {
 				meta: {}
 			};
 
-			spyOn(context, 'emit');
+			var onError = jasmine.createSpy('error');
+			var onDone = jasmine.createSpy('done');
+			context.on('error', onError);
+			context.on('done', onDone);
 
 			var response = context.setData(dto);
 			expect(response).toBe(false);
@@ -237,37 +248,36 @@ describe('RepositoryContext', function() {
 			expect(context.data).toBe(null);
 			expect(context.error).toBe(context.INVALID_RESPONSE);
 
-			expect(context.emit).toHaveBeenCalledWith('error', context.INVALID_RESPONSE);
-
-			dto.data = [];
-
-			context.emit.calls.reset();
-
-			response = context.setData(dto);
-			expect(response).toBe(true);
-
-			expect(context.data).toBe(dto.data);
-			expect(context.error).toBe(null);
-
-			expect(context.emit).toHaveBeenCalledWith('change', context.data);
+			expect(onError).toHaveBeenCalledWith(context.INVALID_RESPONSE);
+			expect(onDone).toHaveBeenCalledWith({
+				data: null,
+				error: context.INVALID_RESPONSE
+			});
 		});
 	});
 
 	describe('#setError(Mixed error)', function() {
-		it('should set the error property with the errors of last call and emit "error" event with the errors', function() {
+		it('should set the error property with the errors of last call and emit "error" and "done" events with the errors', function() {
 			expect(context.error).toBe(null);
 			expect(context.data).toBe(null);
 
 			var errors = ['An error happened'];
 
-			spyOn(context, 'emit');
+			var onError = jasmine.createSpy('error');
+			var onDone = jasmine.createSpy('done');
+			context.on('error', onError);
+			context.on('done', onDone);
 
 			context.setError(errors);
 
 			expect(context.error).toBe(errors);
 			expect(context.data).toBe(null);
 
-			expect(context.emit).toHaveBeenCalledWith('error', errors);
+			expect(onError).toHaveBeenCalledWith(errors);
+			expect(onDone).toHaveBeenCalledWith({
+				data: null,
+				error: errors
+			});
 		});
 	});
 });

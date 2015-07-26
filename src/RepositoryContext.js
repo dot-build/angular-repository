@@ -76,6 +76,10 @@ function RepositoryContextFactory(EventEmitter, utils, ContextQueryBuilder, $win
 		this.error = null;
 
 		this.emit('change', this.data);
+		this.emit('done', {
+			data: this.data,
+			error: false
+		});
 
 		return true;
 	}
@@ -83,6 +87,10 @@ function RepositoryContextFactory(EventEmitter, utils, ContextQueryBuilder, $win
 	function setError(error) {
 		this.error = error;
 		this.emit('error', error);
+		this.emit('done', {
+			data: null,
+			error: error
+		});
 	}
 
 	function reset() {
