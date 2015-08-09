@@ -1,5 +1,6 @@
-(function(undefined) {
-    var modl = angular.module('repository', ['EventEmitter']);
+(function(handbag, undefined) {
+    handbag.value('EventEmitter', window.EventEmitter);
+    handbag.value('$q', window.Q);
 
 function ContextQueryBuilderFactory(utils, QueryBuilder, EventEmitter) {
     function ContextQueryBuilder() {
@@ -37,7 +38,7 @@ function ContextQueryBuilderFactory(utils, QueryBuilder, EventEmitter) {
     };
     return ContextQueryBuilder;
 }
-modl.factory('ContextQueryBuilder', ContextQueryBuilderFactory);
+handbag.provide('ContextQueryBuilder', ContextQueryBuilderFactory);
 ContextQueryBuilderFactory.$inject = [
     'utils',
     'QueryBuilder',
@@ -65,7 +66,7 @@ function DataProviderInterfaceFactory(utils, $q) {
     }
     return DataProviderInterface;
 }
-modl.factory('DataProviderInterface', DataProviderInterfaceFactory);
+handbag.provide('DataProviderInterface', DataProviderInterfaceFactory);
 DataProviderInterfaceFactory.$inject = [
     'utils',
     '$q'
@@ -139,7 +140,7 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
     utils.merge(QueryBuilder, directions);
     return QueryBuilder;
 }
-modl.factory('QueryBuilder', QueryBuilderFactory);
+handbag.provide('QueryBuilder', QueryBuilderFactory);
 QueryBuilderFactory.$inject = [
     'RepositoryFilter',
     'RepositorySorting',
@@ -285,7 +286,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
     };
     return Repository;
 }
-modl.factory('Repository', RepositoryFactory);
+handbag.provide('Repository', RepositoryFactory);
 RepositoryFactory.$inject = [
     '$q',
     'EventEmitter',
@@ -312,7 +313,7 @@ function RepositoryConfigFactory($injector, DataProviderInterface, utils) {
     }
     return RepositoryConfig;
 }
-modl.factory('RepositoryConfig', RepositoryConfigFactory);
+handbag.provide('RepositoryConfig', RepositoryConfigFactory);
 RepositoryConfigFactory.$inject = [
     '$injector',
     'DataProviderInterface',
@@ -411,7 +412,7 @@ function RepositoryContextFactory(EventEmitter, utils, ContextQueryBuilder, $win
     utils.inherits(RepositoryContext, EventEmitter, prototype);
     return RepositoryContext;
 }
-modl.factory('RepositoryContext', RepositoryContextFactory);
+handbag.provide('RepositoryContext', RepositoryContextFactory);
 RepositoryContextFactory.$inject = [
     'EventEmitter',
     'utils',
@@ -529,7 +530,7 @@ function RepositoryFilterFactory(EventEmitter, utils) {
     utils.inherits(RepositoryFilter, EventEmitter, prototype);
     return RepositoryFilter;
 }
-modl.factory('RepositoryFilter', RepositoryFilterFactory);
+handbag.provide('RepositoryFilter', RepositoryFilterFactory);
 RepositoryFilterFactory.$inject = [
     'EventEmitter',
     'utils'
@@ -595,7 +596,7 @@ function RepositoryManagerProvider($provide) {
         angular.extend(defaultConfig, values);
     };
 }
-modl.provider('RepositoryManager', RepositoryManagerProvider);
+handbag.provide('RepositoryManager', RepositoryManagerProvider);
 RepositoryManagerProvider.$inject = ['$provide'];
 function RepositoryPaginationFactory(utils, EventEmitter) {
     var paginationDefaults = {
@@ -699,7 +700,7 @@ function RepositoryPaginationFactory(utils, EventEmitter) {
     utils.inherits(RepositoryPagination, EventEmitter, prototype);
     return RepositoryPagination;
 }
-modl.factory('RepositoryPagination', RepositoryPaginationFactory);
+handbag.provide('RepositoryPagination', RepositoryPaginationFactory);
 RepositoryPaginationFactory.$inject = [
     'utils',
     'EventEmitter'
@@ -735,7 +736,7 @@ function RepositoryQueryBuilderFactory($injector, utils, QueryBuilder, EventEmit
     };
     return RepositoryQueryBuilder;
 }
-modl.factory('RepositoryQueryBuilder', RepositoryQueryBuilderFactory);
+handbag.provide('RepositoryQueryBuilder', RepositoryQueryBuilderFactory);
 RepositoryQueryBuilderFactory.$inject = [
     '$injector',
     'utils',
@@ -846,7 +847,7 @@ function RepositorySortingFactory(EventEmitter, utils) {
     utils.inherits(RepositorySorting, EventEmitter, prototype);
     return RepositorySorting;
 }
-modl.factory('RepositorySorting', RepositorySortingFactory);
+handbag.provide('RepositorySorting', RepositorySortingFactory);
 RepositorySortingFactory.$inject = [
     'EventEmitter',
     'utils'
@@ -883,6 +884,6 @@ function utilsFactory() {
         return SubClass;
     }
 }
-modl.factory('utils', utilsFactory);
+handbag.provide('utils', utilsFactory);
 
-}());
+}(window.handbag));

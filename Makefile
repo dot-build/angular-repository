@@ -1,5 +1,11 @@
-all:
+all: build build-handbag
+	;
+
+build:
 	./node_modules/gulp/bin/gulp.js build
+
+build-handbag:
+	./node_modules/gulp/bin/gulp.js buildhbag
 
 tdd:
 	./node_modules/gulp/bin/gulp.js tdd
@@ -24,7 +30,7 @@ apidoc:
 	node apidoc.js;\
 	rm api.tmp;
 
-release: all
+release: build
 	./node_modules/gulp/bin/gulp.js build;\
 	if [ $$? -gt 0 ]; then\
 		exit 1;\
@@ -32,4 +38,4 @@ release: all
 	git add -A;\
 	git commit -m "chore: prepare for release";\
 
-.PHONY: all tdd test watch integration apidoc release
+.PHONY: build tdd test watch integration apidoc release

@@ -1,5 +1,6 @@
 /* jshint node:true, strict: false */
 var gulp = require('gulp'),
+	fs = require('fs'),
 	concat = require('gulp-concat'),
 	uglify = require('gulp-uglify'),
 	rename = require('gulp-rename'),
@@ -9,10 +10,12 @@ var gulp = require('gulp'),
 	pipeline = require('multipipe'),
 	karma = require('karma').server,
 
-	wrapper = '(function(undefined){\n\n<%= contents %>\n}());';
+	wrapper = {
+		angular: fs.readFileSync('./wrappers/angular.js').toString(),
+		handbag: fs.readFileSync('./wrappers/handbag.js').toString()
+	};
 
 diAnnotations.logger.enabled = false;
-diAnnotations.constants.MODULE = 'angular.module(\'repository\')';
 
 var PATH = {
 	sourceFiles: ['src/module.js', 'src/**/*.js'],
@@ -22,11 +25,41 @@ var PATH = {
 };
 
 gulp.task('min', function() {
+	diAnnotations.constants.MODULE = 'modl';
+	diAnnotations.constants.INJECTABLE = "%module%.%type%('%name%', %value%);";
+
 	var pipe = pipeline(
 		gulp.src(PATH.sourceFiles),
 		annotations(),
 		concat(PATH.distFile),
-		wrap(wrapper),
+		wrap(wrapper.angular),
+		gulp.dest(PATH.dist),
+		uglify(),
+		rename({
+			suffix: '.min'
+		}),
+		gulp.dest(PATH.dist)
+	);
+
+	pipe.on('error', function(err) {
+		console.log(err);
+	});
+
+	return pipe;
+});
+
+gulp.task('minhbag', function() {
+	diAnnotations.constants.MODULE = '';
+	diAnnotations.constants.INJECTABLE = "handbag.provide('%name%', %value%);";
+
+	var pipe = pipeline(
+		gulp.src(PATH.sourceFiles),
+		annotations(),
+		concat(PATH.distFile),
+		wrap(wrapper.handbag),
+		rename({
+			basename: 'repository-handbag'
+		}),
 		gulp.dest(PATH.dist),
 		uglify(),
 		rename({
@@ -60,14 +93,14 @@ var fixtures = {
 
 var unitFiles = vendorFiles.concat([
 	fixtures,
-	'src/module.js',
+	'test/module.js',
 	'src/**/*.js',
 	'test/setup.js',
 	'test/unit/**/*.spec.js',
 ]);
 
 var integrationFiles = vendorFiles.concat([fixtures,
-	'src/module.js',
+	'test/module.js',
 	'src/**/*.js',
 	'test/setup.js',
 	'integration/module.js',
@@ -78,6 +111,8 @@ var integrationFiles = vendorFiles.concat([fixtures,
 
 // @see https://github.com/karma-runner/gulp-karma#do-we-need-a-plugin
 gulp.task('unit', function(done) {
+	diAnnotations.constants.MODULE = 'angular.module("repository")';
+	diAnnotations.constants.INJECTABLE = "%module%.%type%('%name%', %value%);";
 	karma.start({
 		configFile: PATH.karmaUnit,
 		singleRun: true,
@@ -86,6 +121,8 @@ gulp.task('unit', function(done) {
 });
 
 gulp.task('tdd', function(done) {
+	diAnnotations.constants.MODULE = 'angular.module("repository")';
+	diAnnotations.constants.INJECTABLE = "%module%.%type%('%name%', %value%);";
 	karma.start({
 		configFile: PATH.karmaUnit,
 		singleRun: false,
@@ -112,5 +149,6 @@ gulp.task('integration-tdd', ['unit'], function(done) {
 });
 
 gulp.task('test', ['integration']);
-gulp.task('build', ['test', 'min']);
+gulp.task('build', ['min']);
+gulp.task('buildhbag', ['minhbag']);
 gulp.task('default', ['tdd']);

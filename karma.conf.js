@@ -16,7 +16,7 @@ module.exports = function(config) {
 		port: 9800,
 
 		preprocessors: {
-			'src/**/!(*EventEmitter).js': ['ngannotations', 'coverage'],
+			'src/**/*.js': ['ngannotations', 'coverage'],
 			'integration/**/*.js': ['ngannotations']
 		},
 
