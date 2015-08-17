@@ -79,7 +79,7 @@ var vendorFiles = [
 	'vendor/angular/angular.js',
 	'vendor/angular-mocks/angular-mocks.js',
 	'vendor/es5-shim/es5-shim.js',
-	'vendor/da-event-emitter/src/EventEmitter.js',
+	'vendor/evt/dist/EventEmitter.js',
 	'test/JSONHttpRequest.js',
 	'test/jasmine-fixtures.js'
 ];
