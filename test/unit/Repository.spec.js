@@ -91,7 +91,7 @@ describe('Repository', function() {
 		}));
 	});
 
-	describe('#find(String id)', function() {
+	describe('#find(String id, Object [config])', function() {
 		it('should retrieve a single entity with the given id through DataProvider#find', inject(function(RepositoryConfig, $q, $rootScope) {
 			var config = instance.config,
 				dataProvider = config.dataProvider,
@@ -100,14 +100,16 @@ describe('Repository', function() {
 				entity = {
 					id: id,
 					name: 'John'
-				};
+				},
+
+				options = {};
 
 			spyOn(dataProvider, 'find').and.returnValue($q.when(entity));
 
-			var promise = instance.find(id),
+			var promise = instance.find(id, options),
 				value;
 
-			expect(dataProvider.find).toHaveBeenCalledWith(instance.config.name, id);
+			expect(dataProvider.find).toHaveBeenCalledWith(instance.config.name, id, options);
 
 			promise.then(function(e) {
 				value = e;
@@ -118,24 +120,26 @@ describe('Repository', function() {
 		}));
 	});
 
-	describe('#save(Object entity)', function() {
+	describe('#save(Object entity, Object [config])', function() {
 		it('should persist the entity values', inject(function($q, $rootScope) {
 			var config = instance.config,
 				dataProvider = config.dataProvider,
 				entity = {
 					id: 'entity-id',
 					name: 'John'
-				};
+				},
+
+				options = {};
 
 			spyOn(dataProvider, 'save').and.returnValue($q.when(true));
-			instance.save(entity);
+			instance.save(entity, options);
 			$rootScope.$digest();
 
-			expect(dataProvider.save).toHaveBeenCalledWith(instance.config.name, entity);
+			expect(dataProvider.save).toHaveBeenCalledWith(instance.config.name, entity, options);
 		}));
 	});
 
-	describe('#saveAll(Object[] entities)', function() {
+	describe('#saveAll(Object[] entities, Object [config])', function() {
 		it('should only allow an array of objects as a valid entity set', inject(function($q, $rootScope) {
 			var invalidSets = {
 				empty: [],
@@ -172,43 +176,47 @@ describe('Repository', function() {
 				}, {
 					id: 2,
 					name: 'Paul'
-				}];
+				}],
+
+				options = {};
 
 			spyOn(dataProvider, 'saveAll').and.returnValue($q.when(true));
-			instance.saveAll(entitySet);
+			instance.saveAll(entitySet, options);
 
 			$rootScope.$digest();
 
-			expect(dataProvider.saveAll).toHaveBeenCalledWith(instance.config.name, entitySet);
+			expect(dataProvider.saveAll).toHaveBeenCalledWith(instance.config.name, entitySet, options);
 		}));
 	});
 
-	describe('#remove(String id)', function() {
+	describe('#remove(String id, Object [config])', function() {
 		it('should remove a single entity found by ID', inject(function($q, $rootScope) {
 			var config = instance.config,
 				dataProvider = config.dataProvider,
-				entityId = 'entity-id';
+				entityId = 'entity-id',
+				options = {};
 
 			spyOn(dataProvider, 'remove').and.returnValue($q.when(true));
-			instance.remove(entityId);
+			instance.remove(entityId, options);
 			$rootScope.$digest();
 
-			expect(dataProvider.remove).toHaveBeenCalledWith(instance.config.name, entityId);
+			expect(dataProvider.remove).toHaveBeenCalledWith(instance.config.name, entityId, options);
 		}));
 	});
 
-	describe('#removeAll(String[] id)', function() {
+	describe('#removeAll(String[] id, Object [config])', function() {
 		it('should remove a set of entities in batch mode', inject(function($q, $rootScope) {
 			var config = instance.config,
 				dataProvider = config.dataProvider,
-				entitySet = [1, 2, 3];
+				entitySet = [1, 2, 3],
+				options = {};
 
 			spyOn(dataProvider, 'removeAll').and.returnValue($q.when(true));
 
-			instance.removeAll(entitySet);
+			instance.removeAll(entitySet, options);
 			$rootScope.$digest();
 
-			expect(dataProvider.removeAll).toHaveBeenCalledWith(instance.config.name, entitySet);
+			expect(dataProvider.removeAll).toHaveBeenCalledWith(instance.config.name, entitySet, options);
 		}));
 	});
 
@@ -235,7 +243,7 @@ describe('Repository', function() {
 		}));
 	});
 
-	describe('#findAll(QueryBuilder query)', function() {
+	describe('#findAll(QueryBuilder query, Object [config])', function() {
 		it('should call the dataProvider with the query parameters and return a promise', inject(function($q, QueryBuilder) {
 			var dataProvider = instance.dataProvider;
 			var response = {
@@ -247,6 +255,8 @@ describe('Repository', function() {
 				data: [{}, {}]
 			};
 
+			var options = {};
+
 			var qb = QueryBuilder.create()
 				.from(instance.name)
 				.limit(2)
@@ -254,7 +264,7 @@ describe('Repository', function() {
 
 			spyOn(dataProvider, 'findAll').and.returnValue($q.when(response));
 
-			instance.findAll(qb);
+			instance.findAll(qb, options);
 			var args = dataProvider.findAll.calls.argsFor(0);
 
 			expect(args[0]).toBe(qb.$$repository);
@@ -266,6 +276,8 @@ describe('Repository', function() {
 
 			expect(args[1].sorting.length).toBe(0);
 			expect(args[1].filters.length).toBe(0);
+
+			expect(args[2]).toBe(options);
 		}));
 
 		it('should trow and error without a valid query builder', function() {
@@ -277,7 +289,7 @@ describe('Repository', function() {
 		});
 	});
 
-	describe('#findBy(String field, value)', function() {
+	describe('#findBy(String field, * value)', function() {
 		it('should create a query builder with a single filter and return a call to #findAll()', inject(function($q, $rootScope, QueryBuilder) {
 			var data = [];
 

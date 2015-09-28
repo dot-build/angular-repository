@@ -165,8 +165,8 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         createQuery: createQuery,
         where: where,
         findBy: findBy,
-        findAll: findAll,
         find: find,
+        findAll: findAll,
         save: save,
         saveAll: saveAll,
         remove: remove,
@@ -231,39 +231,39 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
             return response.data;
         });
     }
-    function findAll(queryBuilder) {
+    function findAll(queryBuilder, options) {
         if (queryBuilder.getRepository() !== this.config.name || !(queryBuilder instanceof QueryBuilder || queryBuilder instanceof RepositoryQueryBuilder)) {
             throw new Error('Invalid query builder');
         }
         var params = queryBuilder.toJSON();
-        return this.dataProvider.findAll(this.config.name, params);
+        return this.dataProvider.findAll(this.config.name, params, options);
     }
-    function find(id) {
-        return this.dataProvider.find(this.config.name, id);
+    function find(id, options) {
+        return this.dataProvider.find(this.config.name, id, options);
     }
-    function remove(entity) {
+    function remove(entity, options) {
         var service = this;
-        return service.dataProvider.remove(this.config.name, entity).then(function (response) {
+        return service.dataProvider.remove(this.config.name, entity, options).then(function (response) {
             service.emit(service.REMOVE, entity);
             return response;
         });
     }
-    function removeAll(entityIds) {
+    function removeAll(entityIds, options) {
         var service = this;
-        return service.dataProvider.removeAll(this.config.name, entityIds).then(function (response) {
+        return service.dataProvider.removeAll(this.config.name, entityIds, options).then(function (response) {
             service.emit(service.REMOVE, entityIds);
             return response;
         });
     }
-    function save(entity) {
+    function save(entity, options) {
         var self = this;
-        return this.dataProvider.save(this.config.name, entity).then(function (response) {
+        return this.dataProvider.save(this.config.name, entity, options).then(function (response) {
             self.emit(self.UPDATE, entity);
             return response;
         });
     }
     var InvalidEntitySetError = new Error('InvalidEntitySetError');
-    function saveAll(entitySet) {
+    function saveAll(entitySet, options) {
         var self = this;
         if (!Array.isArray(entitySet) || entitySet.length === 0) {
             return $q.reject(InvalidEntitySetError);
@@ -274,7 +274,7 @@ function RepositoryFactory($q, EventEmitter, utils, RepositoryContext, Repositor
         if (!validSet) {
             return $q.reject(InvalidEntitySetError);
         }
-        return this.dataProvider.saveAll(this.config.name, entitySet).then(function (response) {
+        return this.dataProvider.saveAll(this.config.name, entitySet, options).then(function (response) {
             self.emit(self.UPDATE, entitySet);
             return response;
         });
