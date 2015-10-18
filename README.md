@@ -63,7 +63,7 @@ RepositoryManager.addRepository(userConfig);
 ## Using the registered Repository
 
 The most common operations can be done directly in the repository, such as create, update, retrieve
-or remove entities. 
+or remove entities.
 
 The only one that has a different mechanism is the search, which is done through
 context objects, called `RepositoryContext`, or via `QueryBuilder` objects.
@@ -75,7 +75,7 @@ whenever a parameter changes, or the last error.
 
 ## RepositoryContext
 
-Each context is created only once, and it lasts in the manager until you manually destroy it, 
+Each context is created only once, and it lasts in the manager until you manually destroy it,
 so you won't lose the context state on page changes (except a full refresh with Ctrl+R), whereas
 `QueryBuilder` instances are disposable.
 
@@ -131,6 +131,8 @@ backend. Here's how:
 
 var query = QueryBuilder.create()
 	.from('User')
+	// optional
+	.select('User.name, User.age')
 	.where('name', QueryBuilder.LK, 'John')
 	.where('age', QueryBuilder.GTE, 21)
 	.sort('name', QueryBuilder.DESC)

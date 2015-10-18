@@ -76,6 +76,7 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
         this.$$sorting = RepositorySorting.create();
         this.$$pagination = RepositoryPagination.create();
         this.$$repository = '';
+        this.$$fields = [];
     }
     function create() {
         return new QueryBuilder();
@@ -91,6 +92,29 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
     function where() {
         this.$$filters.where.apply(this.$$filters, arguments);
         return this;
+    }
+    var FIELD_SEPARATOR = /,\s*/g;
+    function select(model, fields) {
+        if (model && !fields) {
+            fields = model;
+            model = false;
+        }
+        if (typeof fields === 'string' && FIELD_SEPARATOR.test(fields)) {
+            fields = fields.split(FIELD_SEPARATOR);
+        }
+        if (!Array.isArray(fields)) {
+            fields = [fields];
+        }
+        if (model && fields) {
+            fields = fields.map(function (field) {
+                return model + '.' + field;
+            });
+        }
+        fields.forEach(function (field) {
+            if (this.$$fields.indexOf(field) === -1) {
+                this.$$fields.push(field);
+            }
+        }, this);
     }
     function skip(skipValue) {
         this.$$pagination.goToPage(~~(skipValue / this.$$pagination.itemsPerPage) + 1);
@@ -125,6 +149,7 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
         getRepository: getRepository,
         from: from,
         where: where,
+        select: select,
         sort: sort,
         skip: skip,
         limit: limit,
