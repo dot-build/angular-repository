@@ -137,7 +137,7 @@ describe('QueryBuilder', function() {
 		}));
 	});
 
-	ddescribe('#toJSON()', function() {
+	describe('#toJSON()', function() {
 		it('should return the state in the query builder', inject(function(QueryBuilder) {
 			var query = new QueryBuilder();
 
@@ -173,7 +173,6 @@ describe('QueryBuilder', function() {
 					// count was not set on query construction
 				}
 			});
-
 		}));
 	});
 

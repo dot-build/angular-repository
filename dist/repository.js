@@ -115,6 +115,7 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
                 this.$$fields.push(field);
             }
         }, this);
+        return this;
     }
     function skip(skipValue) {
         this.$$pagination.goToPage(~~(skipValue / this.$$pagination.itemsPerPage) + 1);
@@ -138,7 +139,8 @@ function QueryBuilderFactory(RepositoryFilter, RepositorySorting, RepositoryPagi
         return {
             filters: this.$$filters.toJSON(),
             pagination: this.$$pagination.toJSON(),
-            sorting: this.$$sorting.toJSON()
+            sorting: this.$$sorting.toJSON(),
+            fields: this.$$fields.slice()
         };
     }
     function getRepository() {
